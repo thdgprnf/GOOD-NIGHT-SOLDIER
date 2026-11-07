@@ -168,6 +168,11 @@ nav.tabs button.on{color:var(--amber)}
 .sdc .bt button{font-size:10.5px;padding:4px 6px}
 .mbtn{background:none;border:1px solid var(--line);border-radius:999px;width:34px;height:34px;font-size:15px;color:var(--dim);cursor:pointer;margin-right:8px;flex:none}
 .mbtn.on{color:var(--amber);border-color:rgba(224,168,98,.5)}
+.tl{font-family:"Noto Serif KR",serif;font-size:13.5px;line-height:1.75;max-height:56dvh;overflow-y:auto;padding-right:4px}
+.tl .e{padding:7px 0;border-bottom:1px dashed var(--line);animation:in .5s}
+.tl .e b{font-family:"Noto Sans KR",sans-serif;font-weight:500;font-size:11.5px;color:var(--amber);margin-right:6px}
+.tl .e.x{color:#e7b0a0}.tl .e.r{color:var(--blue)}.tl .e.j{color:#e6dcc4}
+.tl .wait{font-size:12px;color:var(--dim);padding:10px 0;font-family:"Noto Sans KR",sans-serif}
 #ytBox{display:none;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:10px;gap:12px;align-items:stretch}
 #ytBox.on{display:flex}
 #ytWrap{width:200px;height:200px;flex:none;border-radius:8px;overflow:hidden;background:#000}
@@ -660,7 +665,7 @@ function resolveMission(w){
  lines.push('— 가져온 것: '+(items.length?items.map(i=>ITEMN[i.id][1]+(i.nw?' (새로 발견)':'')).join(', '):'없음'));
  const title=joint?(injured.length?`함께 나간 임무에서 부상`:'함께 돌아왔다'):(pl.sev[w]?`${NM[w]} 부상 (${SEVN[pl.sev[w]]})`:`${JOSA(NM[w],'이','가')} 돌아왔다`);
  logAt(m.end,{id:joint?'jret':(pl.sev[w]?'inj_'+w+pl.sev[w]:'ret_'+w),t:title,ty:injured.length?'돌봄':joint?'특별':'일상',l:lines,f:false});
- S.pendRet.push({w:parts,dur:m.dur,items,sev:injured.map(p=>pl.sev[p]),inj:injured,lines,fail:pl.fail});
+ S.pendRet.push({w:parts,dur:m.dur,items,sev:injured.map(p=>pl.sev[p]),inj:injured,lines,fail:pl.fail,mis:m});
 }
 function healInj(w,ms,how){
  const st=stage();S.inj[w]=null;delete S.injF[w];
@@ -840,6 +845,91 @@ function statusOf(w){const s=sched(nowHK())[w];const L=[(s.loc==='out'?'':LOCN[s
  const m=S.mis[w];if(m)L.push(`${MD[m.dur].n} 임무 중 · 돌아오기까지 ${fmtLeft(m.end-Date.now())}`);
  const C=S.cond[w];const f=[];if(C.fat>=6)f.push('피곤해 보인다');if(C.pain>=5)f.push(w==='b'?'금속팔이 불편해 보인다':'손목이 불편해 보인다');if(C.str>=5)f.push(w==='b'?'말수가 평소보다 적다':'조금 예민하다');if(w==='c'&&C.cough>0)f.push('기침을 한다');if(w==='c'&&C.ear>=7)f.push('보청기 배터리가 간당간당하다');
  if(f.length)L.push(f.join(' · '));return L}
+
+
+/* ═════════ 임무 진행 지문 ═════════ */
+const MTYPE={30:'patrol',60:'supply',120:'infil',180:'rescue'};
+const ML={
+ b:{patrol:{s:['버키가 은신처 문을 나섰다. 장갑을 끝까지 당겨 끼웠다.'],m:['버키가 숲길 가장자리를 따라 걷는다. 발소리가 거의 나지 않는다.','버키가 진흙 위의 발자국을 살폈다. 짐승의 것이다. 다시 걷기 시작했다.','버키가 나무 뒤에서 잠시 멈춰 주변 소리에 귀를 기울였다.','버키가 은신처 쪽을 한 번 돌아봤다. 아무 이상 없다.','버키가 작은 보온병의 커피를 한 모금 마셨다.','버키가 덫 하나를 발견하고 조용히 해체했다.'],e:['버키가 순찰 경로의 마지막 지점을 확인했다. 돌아갈 시간이다.']},
+  supply:{s:['버키가 지도를 접어 주머니에 넣고 보급로로 향했다.'],m:['버키가 다리 밑을 확인했다. 지난번에 없던 타이어 자국이 있다.','버키가 무너진 검문소를 지나쳤다. 금속팔로 막힌 철문을 밀어 열었다.','버키가 보급 상자 하나를 열어 수량을 셌다. 정확히 맞다.','버키가 도로 위 낙석을 치웠다. 혼자서, 아무렇지 않게.','버키가 무전기를 켰다가, 할 말이 없어 다시 껐다.','버키가 길가의 자두나무 앞에서 아주 잠깐 걸음을 늦췄다.'],e:['버키가 보급로 점검을 마치고 돌아가는 길에 올랐다.']},
+  infil:{s:['버키가 경계하며 건물 안으로 들어섰다. 안은 텅 비어 있다.'],m:['버키가 복도 모퉁이에서 숨을 죽였다. 경비 두 명이 지나간다.','버키가 잠긴 문을 금속팔로 소리 없이 비틀어 열었다.','버키가 서류철을 빠르게 넘겼다. 필요한 것만 사진으로 남긴다.','버키가 환기구 안으로 몸을 밀어 넣었다. 좁다.','버키가 감시 카메라의 사각지대를 따라 움직였다. 몸이 먼저 기억하는 동선이다.','어디선가 금속이 부딪히는 소리. 버키가 아주 잠깐 멈췄다가, 다시 움직였다.'],e:['버키가 빼낸 자료를 품에 넣고 탈출 경로로 향했다.']},
+  rescue:{s:['버키가 목표 지점 근처에 도착했다. 해가 기울고 있다.'],m:['버키가 담장 위에서 경비 교대 시간을 셌다.','버키가 지하 계단을 내려갔다. 습한 공기에 낯익은 냄새가 섞여 있다. 버키는 이를 악물었다.','버키가 구조 대상과 접촉했다. "일어설 수 있나." 짧은 질문이었다.','버키가 구조 대상을 등 뒤에 세우고 복도를 지났다. 금속팔이 방패처럼 앞을 막는다.','총성이 울렸다. 버키는 몸을 낮추고, 정확히 세 발을 돌려줬다.','버키가 떨고 있는 구조 대상에게 자기 재킷을 벗어 덮어 주었다.'],e:['버키가 구조 대상을 인계하고, 혼자 돌아가는 길에 올랐다.']}},
+ c:{patrol:{s:['클린트가 활을 어깨에 메고 문을 나섰다. "금방 올게~"'],m:['클린트가 나무 위로 올라가 주변을 내려다봤다. 경치는 좋다.','클린트가 다람쥐에게 말을 걸었다. 다람쥐는 대답하지 않았다.','클린트가 보청기 볼륨을 높이고 숲 소리를 들었다.','클린트가 바위 위에 앉아 육포를 씹었다. 순찰 중이다. 아마도.','클린트가 멀리 날아가는 새를 화살로 겨눴다가, 그냥 내렸다.','클린트가 길을 잃은 척하다가 진짜로 길을 잃을 뻔했다.'],e:['클린트가 기지개를 켜고 은신처 쪽으로 걸음을 돌렸다.']},
+  supply:{s:['클린트가 낡은 트럭에 시동을 걸었다. 세 번 만에 걸렸다.'],m:['클린트가 보급 창고의 자물쇠를 따고 있다. 콧노래를 부르면서.','클린트가 통조림 상자를 트럭에 실었다. 자두 통조림도 하나 슬쩍.','클린트가 라디오 채널을 돌리다 옛날 노래에서 멈췄다.','클린트가 도로 위에서 트럭 바퀴를 갈았다. 욕을 세 번 했다.','클린트가 휴게소에서 커피 두 잔을 샀다. 하나는 식을 게 뻔한데도.','클린트가 백미러로 따라오는 차가 없는지 확인했다. 장난기 없는 얼굴이었다.'],e:['클린트가 짐을 다 싣고 은신처로 핸들을 꺾었다.']},
+  infil:{s:['클린트가 건물 맞은편 옥상에 자리를 잡았다. 망원경으로 창문을 하나씩 훑는다.'],m:['클린트가 갈고리 화살을 쏘아 줄을 걸었다. 건너가는 데 7초.','클린트가 환풍구 안에서 투덜거렸다. "왜 항상 환풍구야."','클린트가 경비의 무전기를 슬쩍 빼서 주파수를 바꿔 놓았다.','클린트가 천장 위에서 아래를 내려다봤다. 아무도 위를 보지 않는다. 늘 그렇듯.','클린트가 금고 앞에서 손가락을 풀었다. "자, 협조 좀 하자."','클린트가 보청기를 툭 쳤다. 잡음 사이로 발소리가 가까워진다.'],e:['클린트가 창문으로 빠져나왔다. 들어갈 때보다 나올 때가 더 빨랐다.']},
+  rescue:{s:['클린트가 목표 건물이 보이는 언덕에 엎드렸다. 화살을 하나씩 늘어놓는다.'],m:['클린트가 첫 번째 화살을 쐈다. 감시탑 조명이 꺼졌다.','클린트가 구조 대상에게 손짓했다. "괜찮아요, 나 착한 편이에요."','클린트가 연막 화살로 퇴로를 가렸다.','클린트가 구조 대상을 부축해 뛰었다. 숨이 찬다. 그래도 농담은 멈추지 않는다.','클린트의 화살이 쫓아오던 차량 바퀴에 정확히 꽂혔다.','클린트가 마지막 화살을 시위에 걸었다. 남은 건 이것뿐이다.'],e:['클린트가 구조 대상을 무사히 인계했다. 손을 흔들고 돌아섰다.']}}
+};
+const MJ={s:['버키와 클린트가 함께 은신처를 나섰다. 클린트가 앞서 걷고, 버키가 반걸음 뒤에서 뒤를 본다.'],e:['둘이 나란히 돌아가는 길에 올랐다. 클린트가 하품을 하자 버키도 따라 했다.'],
+ patrol:['클린트가 나무 위에서 "이상 없음!" 하고 외쳤다. 버키가 "조용히." 하고 받아쳤다.','버키가 진흙 웅덩이 앞에서 멈추자, 클린트가 그대로 밟고 지나갔다. 버키는 한숨을 쉬고 돌아갔다.','클린트가 주운 솔방울을 버키의 후드에 몰래 넣었다. 버키는 알면서 모른 척했다.','둘은 한참 말없이 걸었다. 그래도 발걸음은 똑같았다.'],
+ supply:['클린트가 운전하고, 버키가 조수석에서 지도를 본다. "왼쪽." "알아." 예전과 같은 대화인데, 말투가 다르다.','버키가 보급 상자를 혼자 두 개씩 들자, 클린트가 박수를 쳤다. "역시 슈퍼 솔져." "들어."','클린트가 휴게소에서 사 온 커피를 버키에게 건넸다. 블랙이었다.','라디오에서 옛날 노래가 나오자 버키가 볼륨을 올렸다. 클린트는 아무 말 없이 따라 흥얼거렸다.'],
+ infil:['클린트가 옥상에서 신호를 보냈다. 버키가 그 신호에 맞춰 정확히 문을 열었다.','버키가 무전으로 낮게 말했다. "왼쪽 복도, 둘." 클린트의 화살 두 발이 거의 동시에 날아갔다.','환풍구 안의 클린트가 투덜거리자, 무전 너머 버키가 말했다. "다 들려." 클린트가 웃음을 참았다.','버키가 막힌 문 앞에 서자, 클린트가 천장에서 거꾸로 내려와 문을 따 줬다. "빚진 거다." "알아."'],
+ rescue:['버키가 앞을 막고, 클린트가 높은 곳에서 엄호했다. 서로 한 번도 돌아보지 않았다. 볼 필요가 없었다.','총성이 울리자 클린트가 먼저 외쳤다. "버키!" "괜찮다." 둘은 다시 움직였다.','버키가 구조 대상을 업고, 클린트가 뒤를 막았다. "늦지 마." "너나."','클린트의 화살이 버키의 등 뒤를 노리던 적을 맞혔다. 버키가 짧게 고개를 끄덕였다.'],
+ love:['잠깐 숨을 고르는 사이, 버키가 클린트의 뺨에 묻은 흙을 엄지로 닦아 줬다.','클린트가 무전으로 속삭였다. "보고 싶다." "옆에 있잖아." "그래도."','엄폐물 뒤에서 버키가 클린트의 손을 한 번 꽉 쥐었다가 놓았다. 다시 움직일 시간이다.']};
+const MGEN={b:['버키가 장갑 끝을 다시 당겨 꼈다.','버키가 시계를 한 번 봤다. 은신처를 나온 지 꽤 됐다.','버키가 숨을 고르며 주변을 한 바퀴 훑었다.','버키가 탄창을 확인했다. 넉넉하다.','버키가 아주 잠깐, 은신처에 두고 온 커피를 생각했다.','버키가 바람 방향을 확인하고 몸을 낮췄다.','버키가 칼날에 묻은 흙을 바지에 닦았다.','버키가 무전기 배터리를 확인했다.'],
+ c:['클린트가 화살통의 화살을 손끝으로 세어 봤다.','클린트가 보청기 배터리 잔량을 확인했다. 아직 괜찮다.','클린트가 혼잣말로 작전을 중얼거렸다. 대부분 농담이었다.','클린트가 활시위를 한 번 튕겨 소리를 들었다.','클린트가 하품을 참았다. 실패했다.','클린트가 주머니에서 껌을 꺼내 씹었다.','클린트가 높은 곳을 찾아 습관처럼 위를 올려다봤다.'],
+ b2:['버키가 문득 클린트가 커피에 설탕을 몇 개 넣는지 떠올렸다. 세 개.','버키가 돌아가는 길에 자두를 살 수 있을지 생각했다. 자기 몫인지 클린트 몫인지는 생각하지 않기로 했다.'],
+ c2:['클린트가 돌아가면 버키한테 해 줄 얘기를 하나 챙겨 뒀다.','클린트가 "버키라면 여기서 어떻게 했을까" 생각했다가, 그냥 자기 방식대로 했다.']};
+const MJG=['둘이 동시에 같은 방향을 가리켰다. 클린트가 웃었다. 버키는 웃지 않았지만, 입꼬리가 조금 올라갔다.','클린트가 버키의 등을 툭 쳤다. "나쁘지 않네, 파트너." "……파트너."','버키가 클린트 쪽으로 물병을 던졌다. 클린트는 보지도 않고 받았다.','쉬는 동안 둘은 같은 벽에 등을 기대고 앉았다. 어깨가 닿을 듯 말 듯했다.','클린트가 손짓으로 "셋 세고"라고 했다. 버키는 둘에서 움직였다. 클린트도 둘에서 움직였다.'];
+const MRADIO={b:['무전에서 클린트의 목소리가 지직거렸다. "거긴 어때?" "조용하다." "여긴 지루해 죽겠어." 버키는 무전을 끄지 않았다.','버키가 무전기를 켰다. "……클린트." "응?" "아니다." 그래도 무전은 한동안 켜져 있었다.'],
+ c:['클린트가 무전을 켰다. "버키, 살아 있어?" "응." "좋아. 나도." 그걸로 충분했다.','무전 너머로 버키가 말했다. "늦지 마라." 클린트가 혼자 씩 웃었다.']};
+const MINJ={b:['파편이 버키의 팔을 스쳤다. 버키는 피를 대충 닦고 계속 움직였다.','버키가 옆구리를 짚었다. 손가락 사이로 피가 배어 나온다. "……괜찮다." 혼잣말이었다.','총성. 버키의 어깨가 뒤로 젖혀졌다. 버키는 아무 소리도 내지 않고 벽에 등을 기댔다.'],
+ c:['클린트가 착지하다 손등을 긁혔다. "아야." 그걸로 끝.','클린트가 계단에서 굴렀다. 다리가 이상한 각도로 꺾였다. "……하하. 괜찮아. 아마도."','총성. 클린트가 쓰러졌다. 무전기 너머로 거친 숨소리만 들린다.']};
+const MJINJ={b:['총성. 버키가 비틀거리자, 클린트가 생각보다 먼저 달려갔다. "벅!"','클린트가 임무를 중단했다. "목표는 다음에. 지금은 너야."'],c:['클린트가 쓰러지자, 버키는 남은 적을 순식간에 정리하고 달려갔다.','"부탁이다. 돌아가자." 버키가 클린트를 일으켜 세웠다.'],both:['총성이 연달아 울렸다. 둘 다 엄폐물 뒤로 몸을 던졌다. 둘 다 피를 흘리고 있었다.','"넌 어디." "너부터." 둘은 서로를 부축하며 퇴로로 향했다.']};
+function mulb(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function misTimeline(m){
+ const rng=mulb(m.seed||Math.floor(m.start/1000)),pl=m.plan||{sev:{}},parts=m.parts||[],st=stage(),type=MTYPE[m.dur]||'patrol';
+ const joint=!!m.joint,mergeAt=m.mergeAt||0,first=m.first||parts[0];
+ const ev=[],R=(a,b)=>a+(b-a)*rng(),T=f=>m.start+(m.end-m.start)*f,nm=w=>NM[w];
+ const inj=parts.filter(p=>pl.sev&&pl.sev[p]);
+ if(inj.length){const at=T(R(.65,.88));if(joint){if(inj.length===2)MJINJ.both.forEach((l,i)=>ev.push({t:at+i*90e3,x:l,c:'x',hurt:1}));else MJINJ[inj[0]].forEach((l,i)=>ev.push({t:at+i*90e3,x:l,c:'x',hurt:1}))}else ev.push({t:at,x:MINJ[parts[0]][pl.sev[parts[0]]-1],c:'x',hurt:pl.sev[parts[0]]>=2?1:0})}
+ const who=joint?'두 사람':nm(parts[0]);
+ if(pl.fail)ev.push({t:T(R(.5,.66)),x:joint?'목표물은 이미 옮겨진 뒤였다. 둘은 잠깐 서로를 봤다.':parts[0]==='b'?'버키가 목표 지점에 도착했지만, 이미 비어 있었다. 한발 늦었다.':'클린트가 목표물이 있어야 할 곳을 열었다. 텅 비어 있었다. "……농담이지."',c:'x'});
+ if(pl.agent)ev.push({t:T(R(.3,.6)),x:joint||parts[0]==='c'?'클린트가 옛 SHIELD 동료와 마주쳤다. 반가운 수다가 시작됐다.'+(joint?' 버키는 그 옆에서 아주 조용히 기다렸다.':''):'버키가 낯익은 얼굴의 요원과 마주쳤다. 짧은 눈인사만 오갔다.'});
+ if(pl.special)ev.push({t:T(R(.4,.8)),x:`${JOSA(who,'이','가')} 잔해 사이에서 뭔가를 발견했다. 조심스럽게 주머니에 넣었다.`});
+ if(pl.extra)ev.push({t:T(R(.4,.8)),x:`${JOSA(who,'이','가')} 버려진 보급품 상자를 찾았다. 붕대와 소독약이 가득하다.`});
+ if(mergeAt)ev.push({t:mergeAt+R(3,10)*60e3,x:'임무 도중, 버키와 클린트가 서로를 발견했다. "……여기서 뭐 해." "너야말로." 둘은 같이 움직이기로 했다.',c:'j',merge:1});
+ if(m.origEnd&&m.end>m.origEnd)ev.push({t:m.origEnd+R(1,4)*60e3,x:`예상보다 일이 길어지고 있다. ${JOSA(who,'은','는')} 아직 돌아갈 수 없다.`,c:'x'});
+ ev.sort((a,b)=>a.t-b.t);
+ const out=[],used={};let merged=!mergeAt,hurt=false,radioN=0;
+ const RET={j:['둘은 퇴로를 따라 조용히 움직였다. 다친 쪽을 다른 한 명이 계속 살폈다.','"조금만 더." 은신처까지 남은 거리를 세는 목소리가 낮았다.','다친 쪽이 괜찮다고 할 때마다, 다른 한 명은 대답 대신 어깨를 더 단단히 받쳤다.'],b:['버키가 상처를 압박한 채 엄폐물에서 엄폐물로 이동했다.','버키가 숨을 고르고 다시 걸었다. 걸음이 조금 느려졌다.','버키가 무전기를 켰다가, 아무 말 없이 껐다.'],c:['클린트가 활을 지팡이 삼아 걸었다. "……괜찮아. 괜찮다고."','클린트가 무전기를 켰다가 껐다. 걱정시킬 말은 하고 싶지 않았다.','클린트가 벽에 기대 잠깐 숨을 골랐다. 농담이 떠오르지 않았다.']};
+ const pick=arr=>{const k=arr.join('|').length+':'+arr.length;used[k]=used[k]||[];let av=arr.map((_,i)=>i).filter(i=>!used[k].includes(i));if(!av.length){used[k]=[];av=arr.map((_,i)=>i)}const i=av[Math.floor(rng()*av.length)];used[k].push(i);return arr[i]};
+ const isJ=()=>joint&&merged;
+ const startLine=isJ()?MJ.s[0]:ML[first][mergeAt?(MTYPE[m.durFirst]||type):type].s[0];
+ out.push({t:m.start,x:startLine,c:isJ()?'j':''});
+ let t=m.start,ei=0;const endT=m.end;
+ while(true){t+=R(3,10)*60e3;if(t>=endT-60e3)break;
+  while(ei<ev.length&&ev[ei].t<=t){const e=ev[ei++];out.push({t:e.t,x:e.x,c:e.c||''});if(e.merge)merged=true;if(e.hurt)hurt=true}
+  if(hurt){out.push({t,x:pick(joint?RET.j:RET[parts[0]]),c:'x'});continue}
+  const ph=(t-m.start)/(endT-m.start);
+  let line,cl='';
+  const gen=w=>MGEN[w].concat(st>=2?MGEN[w+'2']:[]);
+  if(isJ()){const r=rng();if(r<.4){line=pick(MJ[type].concat(st>=4?MJ.love:[]));cl='j'}else if(r<.6){line=pick(MJG);cl='j'}else{const w=rng()<.5?'b':'c';line=rng()<.6?pick(ML[w][type].m):pick(gen(w))}}
+  else{const w=joint?first:parts[0],o=OTH[w],om=S.mis[o];
+   if(!joint&&st>=2&&om&&!om.joint&&om.start<=t&&t<om.end&&radioN<2&&rng()<.22){radioN++;line=pick(MRADIO[w]);cl='r'}
+   else{const ty=mergeAt&&!merged?(MTYPE[m.durFirst]||type):type;line=rng()<.65?pick(ML[w][ty].m):pick(gen(w))}}
+  out.push({t,x:line,c:cl});
+ }
+ while(ei<ev.length){const e=ev[ei++];if(e.t<endT)out.push({t:e.t,x:e.x,c:e.c||''})}
+ const last=endT-R(1,3)*60e3;
+ out.push({t:last,x:inj.length?(joint?`${JOSA(who,'이','가')} 서로를 부축하며 은신처로 향하고 있다.`:`${JOSA(who,'이','가')} 다친 몸으로 은신처를 향해 걷고 있다.`):isJ()?MJ.e[0]:ML[joint?first:parts[0]][type].e[0],c:inj.length?'x':isJ()?'j':''});
+ return out.sort((a,b)=>a.t-b.t);
+}
+const hm=ms=>{const d=new Date(ms+KST);return pad(d.getUTCHours())+':'+pad(d.getUTCMinutes())};
+let tlTimer=null;
+function timelineSheet(w,mm,full){
+ const m=mm||S.mis[w];if(!m){toast('지금은 임무 중이 아니에요');return}
+ if(!m.parts)m.parts=[w];
+ const parts=m.parts||[w],title=parts.length>1?'버키 & 클린트':NM[parts[0]];
+ const draw=()=>{const now=Date.now(),all=misTimeline(m),vis=full?all:all.filter(e=>e.t<=now);
+  const box=$('tlBox');if(!box){clearInterval(tlTimer);return}
+  const atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<40;
+  box.innerHTML=vis.map(e=>`<div class="e ${e.c}"><b>[${hm(e.t)}]</b>${esc(e.x)}</div>`).join('')+(full||!S.mis[parts[0]]?'':'<div class="wait">… 계속 진행 중</div>');
+  if(atBottom||!box.dataset.init){box.scrollTop=box.scrollHeight;box.dataset.init=1}
+  const sub=$('tlSub');if(sub)sub.textContent=full?`${hm(m.start)} 출발 · ${hm(m.end)} 귀환`:`${hm(m.start)} 출발 · ${m.origEnd&&now>m.origEnd&&m.end>m.origEnd?'예상보다 길어지는 중':'돌아오기까지 '+fmtLeft(m.end-now)}`};
+ sheet(`<h2>${esc(title)} · ${MD[m.dur].n}</h2><div class="sub" id="tlSub"></div><div class="tl" id="tlBox"></div><div class="opts" style="margin-top:12px"><button class="btn" id="okT">닫기</button></div>`);
+ draw();clearInterval(tlTimer);if(!full)tlTimer=setInterval(()=>{if(!$('modal').classList.contains('on')){clearInterval(tlTimer);return}draw()},10000);
+ $('okT').onclick=()=>{clearInterval(tlTimer);closeSheet();if(full)setTimeout(showReturns,250)};
+}
 
 /* ═════════ 말 걸기 ═════════ */
 const TALK={
@@ -1113,7 +1203,7 @@ function renderMis(){
  const box=$('misBox');if(!box)return;const now=Date.now(),st=stage();let html='';
  for(const w of['b','c']){const m=S.mis[w],i=S.inj[w],col=w==='b'?'var(--blue)':'var(--plum)';
   let s1,cls='',btn='';
-  if(m){const over=m.origEnd&&now>m.origEnd&&m.end>m.origEnd;s1=`${MD[m.dur].n}${m.joint?' · 함께':''} · ${over?'예상보다 길어지는 중':'돌아오기까지 '+fmtLeft(m.end-now)}`}
+  if(m){const over=m.origEnd&&now>m.origEnd&&m.end>m.origEnd;s1=`${MD[m.dur].n}${m.joint?' · 함께':''} · ${over?'예상보다 길어지는 중':'돌아오기까지 '+fmtLeft(m.end-now)}`;btn=`<button class="mini" data-pr="${w}">진행도</button>`}
   else if(i){cls='inj'+i.sev;const lh=Math.ceil((i.until-now)/H);s1=`부상(${SEVN[i.sev]}) · 자연 회복까지 약 ${lh}시간`;btn=`<button class="mini" data-tr="${w}">치료하기</button>`}
   else if(w==='c'&&S.clintOut){s1='아직 돌아오지 않았다'}
   else{s1='은신처에 있음';btn=`<button class="mini" data-go="${w}">임무 보내기</button>`}
@@ -1124,6 +1214,7 @@ function renderMis(){
  box.innerHTML=html;
  box.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>missionSheet(b.dataset.go));
  box.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>playerTreat(b.dataset.tr));
+ box.querySelectorAll('[data-pr]').forEach(b=>b.onclick=()=>timelineSheet(b.dataset.pr));
 }
 function missionSheet(w){
  const opts=[30,60,120,180].map(d=>{const md=MD[d];return`<button class="btn" data-d="${d}"><span class="dur"><span><b>${d<60?d+'분':(d/60)+'시간'} · ${md.n}</b><small>${md.d}</small></span><span class="r">부상 위험 ${md.risk}<br>새 물건 ${['드묾','가끔','자주','아주 자주'][[30,60,120,180].indexOf(d)]}${md.k>1?' · 2개':''}</span></span></button>`}).join('');
@@ -1134,10 +1225,10 @@ function sendMission(w,dur){
  const now=Date.now(),st=stage(),parts=w==='both'?['b','c']:[w];
  const pl=planMission(dur,parts);let end=now+dur*60e3;const orig=end;
  if(pl.abort)end=now+dur*60e3*(.4+Math.random()*.4);if(pl.ext)end+=dur*60e3*.5;
- let m={start:now,end,origEnd:orig,dur,plan:pl,joint:parts.length>1,parts};
+ let m={start:now,end,origEnd:orig,dur,plan:pl,joint:parts.length>1,parts,seed:Math.floor(Math.random()*2e9)};
  if(parts.length===1){const o=OTH[w],om=S.mis[o];
   if(om&&!om.joint&&om.plan&&Math.random()<.2){const sev={};sev[o]=om.plan.sev[o]||0;sev[w]=pl.sev[w]||0;
-   m={start:om.start,end:Math.max(om.end,end),origEnd:Math.max(om.origEnd||om.end,orig),dur:Math.max(om.dur,dur),plan:Object.assign({},pl,{sev,merged:true,abort:false,ext:false}),joint:true,parts:[o,w]};S.mis[o]=m}}
+   m={start:om.start,end:Math.max(om.end,end),origEnd:Math.max(om.origEnd||om.end,orig),dur:Math.max(om.dur,dur),plan:Object.assign({},pl,{sev,merged:true,abort:false,ext:false}),joint:true,parts:[o,w],seed:om.seed||Math.floor(om.start/1000),mergeAt:now,first:o,durFirst:om.dur};S.mis[o]=m}}
  for(const p of parts)S.mis[p]=m;
  const ent={h:nowHK(),id:'dep',t:parts.length>1?`두 사람이 함께 ${MD[dur].n} 임무를 나갔다.`:`${JOSA(NM[w],'이','가')} ${MD[dur].n} 임무를 나갔다.`,ty:'일상',f:true};S.log.push(ent);
  if(parts.length>1){markFirst('first_joint',nowHK(),ent);resp(st>=4?'둘이 함께 장비를 챙겼다. 클린트가 버키의 장갑을 건네주자, 버키가 클린트의 화살통 끈을 고쳐 매 주고 그 이마에 짧게 입을 맞췄다.':'둘이 함께 장비를 챙겼다. 클린트가 버키의 장갑을 건네주고, 버키가 클린트의 화살통 끈을 고쳐 매 주었다.')}
@@ -1160,8 +1251,9 @@ function showReturns(){
  const who=parts.length>1?'두 사람이':JOSA(NM[parts[0]],'이','가');
  const it=r.items.length?r.items.map(i=>`<div class="card"><h4>${esc(ITEMN[i.id][1])}${i.nw?'<span class="newb">NEW</span>':` <span style="color:var(--dim);font-size:11px">×${S.items[i.id]}</span>`}</h4><p>${esc(ITEMN[i.id][2])}</p></div>`).join(''):'<div class="prog">이번엔 빈손이에요.</div>';
  const injTxt=inj.length?inj.map((p,k)=>`${NM[p]} ${SEVN[sevs[k]]}`).join(', '):'';
- sheet(`<h2>${inj.length?`${who} 다쳐서 돌아왔어요`:`${who} 돌아왔어요`}</h2><div class="sub">${MD[r.dur].n} 임무${r.fail?' · 목표 실패':''}${inj.length?` · 부상: ${injTxt}`:' · 무사 귀환'}</div><div class="lines" style="font-size:13.5px;margin-bottom:10px">${linesHTML(r.lines.slice(0,-1))}</div><div class="sec" style="margin-top:4px">가져온 물건</div>${it}<div class="opts" style="margin-top:12px"><button class="btn" id="okR">확인</button></div>`);
+ sheet(`<h2>${inj.length?`${who} 다쳐서 돌아왔어요`:`${who} 돌아왔어요`}</h2><div class="sub">${MD[r.dur].n} 임무${r.fail?' · 목표 실패':''}${inj.length?` · 부상: ${injTxt}`:' · 무사 귀환'}</div><div class="lines" style="font-size:13.5px;margin-bottom:10px">${linesHTML(r.lines.slice(0,-1))}</div><div class="sec" style="margin-top:4px">가져온 물건</div>${it}<div class="opts" style="margin-top:12px">${r.mis?'<button class="btn" id="logR">임무 기록 전체 보기</button>':''}<button class="btn" id="okR">확인</button></div>`);
  $('okR').onclick=()=>{closeSheet();setTimeout(showReturns,250)};
+ if(r.mis&&$('logR'))$('logR').onclick=()=>{closeSheet();setTimeout(()=>timelineSheet(null,r.mis,true),200)};
 }
 
 function itemSheet(id){
