@@ -1197,8 +1197,8 @@ function renderProf(){
  let h=`<button class="pback" id="pBack">‹ 프로필 목록</button><div class="phead">${phHTML(w,120)}<div class="nm">${esc(P.name||NM[w])}</div><div style="display:flex;gap:6px"><button class="mini" id="pPhoto">${AV[w]?'사진 바꾸기':'사진 넣기'}</button>${AV[w]?'<button class="mini" id="pPhotoDel">지우기</button>':''}</div></div>`;
  h+=`<div class="ptabs"><button class="chip${profTab==='info'?' on':''}" data-t="info">프로필</button><button class="chip${profTab==='sd'?' on':''}" data-t="sd">SD 캐릭터 설정</button></div>`;
  if(profTab==='info'){
-  const F=[['name','이름'],['gender','성별'],['height','키'],['age','나이']];
-  h+=`<div class="sec" style="margin-top:4px"><span>기본 정보</span><button class="mini" id="pEdit">${profEdit?'저장':'수정'}</button></div><div class="info">${F.map(([k,n])=>`<div class="r"><span class="k">${n}</span><span class="v">${profEdit?`<input data-f="${k}" value="${esc(P[k]||'')}" placeholder="직접 입력">`:(P[k]?esc(P[k]):'<span style="color:#5b5f69">눌러서 수정에서 입력</span>')}</span></div>`).join('')}</div>`;
+  const F=[['name','이름'],['gender','성별'],['height','키'],['age','나이'],['bd','생일']];const bdTxt=v=>{const m=/^(\d\d)-(\d\d)$/.exec(v||'');return m?`${+m[1]}월 ${+m[2]}일`:''};const val=k=>k==='bd'?(S.bd[w]||''):(P[k]||'');
+  h+=`<div class="sec" style="margin-top:4px"><span>기본 정보</span><button class="mini" id="pEdit">${profEdit?'저장':'수정'}</button></div><div class="info">${F.map(([k,n])=>`<div class="r"><span class="k">${n}</span><span class="v">${profEdit?`<input data-f="${k}" value="${esc(val(k))}" placeholder="${k==='bd'?'MM-DD (예: 01-07)':'직접 입력'}">`:(val(k)?esc(k==='bd'?bdTxt(val(k)):val(k)):'<span style="color:#5b5f69">수정을 눌러 입력</span>')}</span></div>`).join('')}</div>`;
   h+=`<div class="sec"><span>현재 상태</span></div><div class="info"><div class="r"><span class="v">${statusOf(w).map(esc).join('<br>')}</span></div></div>`;
   h+=`<div class="quote" style="border-color:${col}"><small>${NM[w]}${w==='b'?'가':'가'} 생각하는 ${NM[o]}</small>${thinkOf(w).map(esc).join('<br><br>')}</div>`;
   const hb=Object.keys(S.habits).filter(k=>HABITS[k]&&HABITS[k][0]===NM[w]).sort((a,c)=>S.habits[c]-S.habits[a]).slice(0,3);
@@ -1215,7 +1215,7 @@ function renderProf(){
  B.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{profTab=b.dataset.t;profEdit=false;renderProf()});
  $('pPhoto').onclick=()=>pickFile(async f=>{try{AV[w]=await readImage(f,{max:240,square:true,pix:!!AV['p'+w]});saveAV();renderProf();toast('프로필 사진을 바꿨어요')}catch(e){toast('이미지를 읽지 못했어요')}});
  if($('pPhotoDel'))$('pPhotoDel').onclick=()=>{AV[w]=null;saveAV();renderProf()};
- if(profTab==='info'){$('pEdit').onclick=()=>{if(profEdit){B.querySelectorAll('[data-f]').forEach(i=>{S.prof[w][i.dataset.f]=i.value.trim()});save();toast('프로필을 저장했어요')}profEdit=!profEdit;renderProf()}}
+ if(profTab==='info'){$('pEdit').onclick=()=>{if(profEdit){let bad=false;B.querySelectorAll('[data-f]').forEach(i=>{const v=i.value.trim();if(i.dataset.f==='bd'){if(bdOK(v))S.bd[w]=v;else bad=true}else S.prof[w][i.dataset.f]=v});save();toast(bad?'생일은 MM-DD 형식으로 적어 주세요 (예: 01-07)':'프로필을 저장했어요')}profEdit=!profEdit;renderProf()}}
  else{$('sdPix').onchange=e=>{SD.pix[w]=e.target.checked;saveSDLocal();if(DB&&UID)DB.doc('data/users/'+UID+'/sdidx').set(sdIndex()).catch(()=>{});renderProf()};
   B.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>pickFile(async f=>{try{const d=await readImage(f,{max:256,square:false,pix:SD.pix[w]});if(!SD.pix[w]&&!d.startsWith('data:image/png')){}setSD(w,b.dataset.up,d);renderProf();toast('SD 그림을 넣었어요')}catch(e){toast('이미지를 읽지 못했어요')}}));
   B.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{setSD(w,b.dataset.del,null);renderProf()})}
