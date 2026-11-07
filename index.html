@@ -296,7 +296,7 @@ function fresh(){
  const hk=nowHK();
  return{v:1,created:Date.now(),start:hk,lastHour:hk,pts:0,bonus:{d:0,n:0},couple:null,couplePts:null,coupleDay:null,nameSwap:false,
  ms:{},done:{},seen:{},recent:[],log:[],habits:{},gifts:{},photos:[],props:{},wo:null,fight:0,privDay:null,clintOut:false,seq:null,
- bd:{b:'03-10',c:''},set:{priv:true},savedAt:Date.now(),fsnow:{}};
+ bd:{b:'03-10',c:'01-07'},set:{priv:true},savedAt:Date.now(),fsnow:{}};
 }
 let AV={b:null,c:null,pb:false,pc:false};
 try{const a=localStorage.getItem('gns_av');if(a)AV=Object.assign(AV,JSON.parse(a))}catch(e){}
@@ -824,7 +824,8 @@ async function loadSDCloud(){try{const ix=await DB.doc('data/users/'+UID+'/sdidx
 function sdState(p){if(p.inj)return'hurt';if(p.sleep)return'sleep';const a=p.act||'';
  if(/먹/.test(a))return'eat';if(/책/.test(a))return'read';if(/정비|손목/.test(a))return'work';if(/TV/.test(a))return'tv';if(p.loc==='kitchen'&&/만들|준비/.test(a))return'cook';if(p.loc==='window')return'window';return'idle'}
 const sdImg=(w,p)=>{const st=sdState(p);return SD[w][st]||SD[w].idle||null};
-function ensureProf(){S.prof=S.prof||{};S.prof.b=Object.assign({name:'제임스 뷰캐넌 반즈 (버키)',gender:'남성',height:'',age:'1917년생 · 외견상 30대'},S.prof.b||{});S.prof.c=Object.assign({name:'클린턴 프랜시스 바튼 (클린트)',gender:'남성',height:'',age:''},S.prof.c||{})}
+function ensureProf(){S.prof=S.prof||{};S.prof.b=Object.assign({name:'제임스 뷰캐넌 반즈 (버키)',gender:'남성',height:'183cm',age:'1917년생 · 외견상 30대'},S.prof.b||{});S.prof.c=Object.assign({name:'클린턴 프랜시스 바튼 (클린트)',gender:'남성',height:'191cm',age:'26세'},S.prof.c||{});
+ if(!S.prof.b.height)S.prof.b.height='183cm';if(!S.prof.c.height)S.prof.c.height='191cm';if(!S.prof.c.age)S.prof.c.age='26세';if(!S.migBd){S.migBd=1;if(!S.bd.c)S.bd.c='01-07'}}
 const THINK={
  b:['바튼. 활을 쓴다. 실력은 확실하다. 등을 맡기기엔, 아직 모르겠다.','시끄럽다. 그런데 기차 소리가 날 때마다 TV 볼륨이 올라간다. 우연은 아닌 것 같다.','클린트. 커피에 설탕 세 개. 늦게 자고, 생각보다 일찍 일어난다. ……이런 걸 왜 다 알고 있는지는 모르겠다.','그가 늦으면 시계를 보게 된다. 그 이유는 생각하지 않으려고 한다.','내가 이런 걸 가져도 되는지, 아직도 모르겠다. 그래도 그가 잡은 손을 먼저 놓고 싶지는 않다.','아침에 먼저 깨면, 그냥 본다. 그게 하루 중 제일 조용한 시간이다.'],
  c:['반즈. "윈터 솔져"라고 부르면 안 된다. 그건 확실히 배웠다. 나머지는 아직 모름.','말이 없다. 근데 내가 보청기를 빼면 탁자를 두드려 준다. 그런 사람이 나쁜 사람일 리가.','버키. 같이 있으면 조용해도 안 어색한 사람. 그런 사람, 별로 없는데.','나 혼자 착각하는 건가? ……아니, 착각 아니라고 했지. 어느 쪽 착각인지는 말 안 해 줬지만.','"기다렸어"라는 말을 이렇게 좋아하게 될 줄은 몰랐다.','이제 칫솔이 두 개인 게 당연하다. 그게 제일 좋다.']
