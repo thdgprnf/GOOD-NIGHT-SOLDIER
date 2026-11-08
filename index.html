@@ -589,7 +589,7 @@ const ITEMS=[
  ['c16','손목시계','일상적으로 착용하는 시계.'],['c17','접이식 칼','일상적인 작업이나 임무에 사용하는 도구.'],['c18','오래된 사진','가족 또는 어벤져스 동료들과 찍은 사진.'],['c19','냉장고 자석','가족과 관련된 소소한 기념품.'],['c20','낡은 야구 모자','클린트가 편하게 쓸 법한 모자.']
 ];
 const ITEMN=Object.fromEntries(ITEMS.map(i=>[i[0],i]));
-const MD={30:{n:'주변 정찰',d:'은신처 근처를 한 바퀴. 가벼운 임무.',pi:.10,sev:[.85,.15,0],pn:.25,k:1,risk:'낮음'},60:{n:'보급로 확보',d:'보급 경로를 점검하고 돌아온다.',pi:.22,sev:[.65,.30,.05],pn:.4,k:1,risk:'보통'},120:{n:'거점 잠입',d:'적 거점에 잠입해 정보를 빼 온다.',pi:.38,sev:[.45,.40,.15],pn:.6,k:2,risk:'높음'},180:{n:'요인 구출',d:'가장 위험한 임무. 무사히 돌아오길.',pi:.55,sev:[.3,.42,.28],pn:.8,k:2,risk:'매우 높음'}};
+const MD={30:{n:'주변 정찰',d:'은신처 근처를 한 바퀴. 가벼운 임무.',pi:.10,sev:[.85,.15,0],pn:.25,k:1,bp:0,risk:'낮음'},60:{n:'보급로 확보',d:'보급 경로를 점검하고 돌아온다.',pi:.22,sev:[.65,.30,.05],pn:.4,k:1,bp:.1,risk:'보통'},120:{n:'거점 잠입',d:'적 거점에 잠입해 정보를 빼 온다.',pi:.38,sev:[.45,.40,.15],pn:.6,k:1,bp:.2,risk:'높음'},180:{n:'요인 구출',d:'가장 위험한 임무. 무사히 돌아오길.',pi:.55,sev:[.3,.42,.28],pn:.8,k:1,bp:.35,risk:'매우 높음'}};
 const SEVN=['','경도','중등도','중증'],SEVH=[0,3,12,24];
 const NM={b:'버키',c:'클린트'},OTH={b:'c',c:'b'};
 const JOSA=(w,a,b)=>{const c=w.charCodeAt(w.length-1)-0xac00;return w+((c>=0&&c<=11171&&c%28)?a:b)};
@@ -635,7 +635,7 @@ const grp3=st=>st<2?0:st<4?1:2;
 const hourMs=hk=>hk*H-KST;
 const awayAt=(w,ms)=>{const m=S.mis&&S.mis[w];return!!(m&&m.start<=ms&&ms<m.end)};
 function ensure(){ensureProf();S.cond=S.cond||condInit();S.memc=S.memc||{};S.fs=S.fs||{};S.notes=S.notes||[];S.itemInfo=S.itemInfo||{};S.firsts=S.firsts||{move_in:S.start};S.frev=S.frev||{};S.mis=S.mis||{b:null,c:null};S.inj=S.inj||{b:null,c:null};S.items=S.items||{};S.pendRet=S.pendRet||[];S.injF=S.injF||{};if(S.kit==null)S.kit=!!(S.props&&S.props.kit)}
-function rollItems(dur){const md=MD[dur],got=[];for(let i=0;i<md.k;i++){const un=ITEMS.filter(it=>!S.items[it[0]]&&!got.includes(it[0]));let id;if(un.length&&Math.random()<md.pn)id=un[Math.floor(Math.random()*un.length)][0];else id=ITEMS[Math.floor(Math.random()*ITEMS.length)][0];got.push(id)}return got}
+function rollItems(dur){const md=MD[dur],got=[];const n=1+(Math.random()<(md.bp||0)?1:0);for(let i=0;i<n;i++){const un=ITEMS.filter(it=>!S.items[it[0]]&&!got.includes(it[0]));let id;if(un.length&&Math.random()<md.pn)id=un[Math.floor(Math.random()*un.length)][0];else id=ITEMS[Math.floor(Math.random()*ITEMS.length)][0];got.push(id)}return got}
 function rollInjury(dur){const md=MD[dur];if(Math.random()>=md.pi)return 0;let r=Math.random(),a=0;for(let i=0;i<3;i++){a+=md.sev[i];if(r<a)return i+1}return 1}
 function logAt(ms,ent){ent.h=Math.floor((ms+KST)/H);S.log.push(ent);if(!ent.f){S.seen[ent.id]=(S.seen[ent.id]||0)+1}}
 function planMission(dur,parts){const pl={fail:Math.random()<FAILP[dur],extra:Math.random()<.12,special:Math.random()<SPECP[dur],agent:Math.random()<.08,sev:{}};let inj=false;
@@ -1217,7 +1217,7 @@ function renderMis(){
  box.querySelectorAll('[data-pr]').forEach(b=>b.onclick=()=>timelineSheet(b.dataset.pr));
 }
 function missionSheet(w){
- const opts=[30,60,120,180].map(d=>{const md=MD[d];return`<button class="btn" data-d="${d}"><span class="dur"><span><b>${d<60?d+'분':(d/60)+'시간'} · ${md.n}</b><small>${md.d}</small></span><span class="r">부상 위험 ${md.risk}<br>새 물건 ${['드묾','가끔','자주','아주 자주'][[30,60,120,180].indexOf(d)]}${md.k>1?' · 2개':''}</span></span></button>`}).join('');
+ const opts=[30,60,120,180].map(d=>{const md=MD[d];return`<button class="btn" data-d="${d}"><span class="dur"><span><b>${d<60?d+'분':(d/60)+'시간'} · ${md.n}</b><small>${md.d}</small></span><span class="r">부상 위험 ${md.risk}<br>새 물건 ${['드묾','가끔','자주','아주 자주'][[30,60,120,180].indexOf(d)]}${md.bp?' · 가끔 1개 더':''}</span></span></button>`}).join('');
  sheet(`<h2>${w==='both'?'함께 임무 보내기':NM[w]+' 임무 보내기'}</h2><div class="sub">실제 시간이 지나야 돌아와요. 길수록 위험하지만 처음 보는 물건을 가져올 확률이 높아요. 가끔은 실패하거나, 길어지거나, 뜻밖의 일이 생겨요.</div><div class="opts">${opts}<button class="btn" data-d="x">그만두기</button></div>`);
  document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const d=b.dataset.d;closeSheet();if(d==='x')return;sendMission(w,+d)});
 }
