@@ -400,6 +400,7 @@ function sched(hk){
  if(S.clintOut)c=P('out','아직 돌아오지 않았다.','돌아오지 않았다.');
  if(S.mis){const ms=hk===nowHK()?Date.now():hourMs(hk)+60e3,sc={b,c};
   for(const w of['b','c']){
+   if(walkAt(w,ms)){sc[w]=P('out',S.walk.parts.length>1?'럭키를 데리고 함께 산책 중이다.':'럭키와 산책 중이다.','럭키와 산책을 다녀왔다.');continue}
    if(awayAt(w,ms)){const m=S.mis[w];sc[w]=P('out',`임무 중이다. (${MD[m.dur].n}${m.joint?', 함께':''})`,'임무를 나가 있었다.');continue}
    const inj=S.inj[w];if(inj){const night=h>=23||h<7;const A=['','붕대를 감은 채, 평소처럼 지내려 하고 있다.','소파에 기대 쉬고 있다. 움직일 때마다 얼굴을 찡그린다.','부상으로 누워 있다. 거의 움직이지 못한다.'];
     sc[w]=night?P('bed','다친 채로 잠들어 있다.','다친 채로 잠들었다.',1):P(inj.sev===3?'bed':'sofa',A[inj.sev],['','붕대를 감은 채 지냈다.','소파에서 쉬었다.','누워서 지냈다.'][inj.sev]);sc[w].inj=inj.sev}
@@ -422,7 +423,7 @@ function sched(hk){
    else if(C.c.str>=5)c=P(c.loc,c.act.replace(/\.$/,'')+(hsh(hk)<.5?'. 평소보다 농담이 많다.':'. 평소와 달리 말이 없다.'),c.log);
    if(C.c.cough>0&&!c.sleep)c.act=c.act.replace(/\.$/,'')+'. 가끔 기침을 한다.'}}
  {const wn=weatherAt(hk),sl=slotOf(h);
-  if(DAY.includes(sl)&&h!==12&&h!==13){
+  if(h>=8&&h<18&&h!==12&&h!==13){
    const WB={clear:['window','창문을 열어 환기하고 있다.'],rain:['window','창밖의 비를 한참 바라보고 있다.'],storm:['window','창문과 문단속을 다시 확인하고 있다.'],snow:['window','창밖에 쌓이는 눈을 바라보고 있다.'],fog:['window','평소보다 오래 창밖을 살피고 있다.']};
    const WC={clear:['window','창가에서 햇빛을 쬐고 있다.',0],cloudy:['sofa','흐린 날씨에 소파에서 낮잠을 자고 있다.',1],rain:['sofa','빗소리를 들으며 라디오를 켜 두었다.',0],storm:['sofa','천둥소리에 어깨가 조금 굳어 있다.',0],snow:['window','장갑을 찾다가, 결국 창가에서 눈 구경을 하고 있다.',0],fog:[null,'은신처 조명을 전부 켜 두었다.',0]};
    if(WB[wn]&&!b.sleep&&b.loc!=='out'&&!b.inj&&hsh(hk*7+3)<.28)b=P(WB[wn][0],WB[wn][1],WB[wn][1].replace('고 있다.','었다.').replace('두었다.','두었다.'));
@@ -438,7 +439,7 @@ const HABITS={
  b_plum:['버키','자두를 좋아한다. 본인은 인정하지 않는다.'],b_smile:['버키','웃다가, 자기가 웃고 있다는 걸 깨닫고 표정을 가라앉힌다.'],
  b_remember:['버키','상대가 커피에 설탕을 몇 개 넣는지, 언제 잠드는지 전부 기억한다.'],b_insom:['버키','잠들지 못하는 밤엔 불 꺼진 거실을 서성인다.'],
  b_clock:['버키','누군가를 기다릴 때 시계를 자주 본다.'],b_quiet:['버키','상대가 아프면 평소보다 말수가 줄어든다.'],
- b_watch:['버키','클린트를 그냥, 오래 바라본다.'],b_worry:['버키','클린트가 평소와 조금만 달라도 하루 종일 곁을 맴돈다.'],b_early:['버키','클린트보다 먼저 일어난다.'],
+ b_watch:['버키','클린트를 그냥, 오래 바라본다.'],b_dog:['버키','럭키에게만은 말이 많아진다. 낮은 목소리로, 아무도 없을 때.'],c_dog:['클린트','럭키와 똑같은 자세로 낮잠을 잔다.'],b_worry:['버키','클린트가 평소와 조금만 달라도 하루 종일 곁을 맴돈다.'],b_early:['버키','클린트보다 먼저 일어난다.'],
  c_late:['클린트','가끔, 아주 늦게까지 잔다.'],c_sugar:['클린트','커피에 설탕을 세 개 넣는다.'],c_nap:['클린트','소파에서 낮잠을 자다가 발을 떨어뜨린다.'],
  c_mono:['클린트','혼자인 줄 알면 혼잣말을 한다.'],c_hearing:['클린트','잘 때는 보청기를 빼서 머리맡에 둔다.'],c_hide:['클린트','다친 건 "별거 아니야"라며 숨긴다.'],
  c_thunder:['클린트','천둥이 치면 아주 잠깐, 굳는다.'],c_joke:['클린트','진지한 이야기는 농담으로 넘긴다.'],c_arm:['클린트','버키의 금속팔을 아무렇지 않게 만진다.'],
@@ -633,7 +634,8 @@ const DEPART={b:['버키가 장비를 챙겨 나갔다. 클린트는 문이 닫�
 const PLAYERTREAT={b:['버키는 누가 붕대를 감았는지 확인하려는 듯 주위를 둘러봤다. 아무도 없었다. 그래도 팔을 빼지는 않았다.','"……고맙다." 누구에게 하는 말인지 모르게, 버키가 중얼거렸다.'],c:['"어… 이거 누가 했어?" 클린트는 감긴 붕대를 내려다보며 두리번거렸다. "유령 씨, 고마워."','클린트가 붕대를 보고 웃었다. "버키한텐 말하지 마. 걱정하니까."']};
 const grp3=st=>st<2?0:st<4?1:2;
 const hourMs=hk=>hk*H-KST;
-const awayAt=(w,ms)=>{const m=S.mis&&S.mis[w];return!!(m&&m.start<=ms&&ms<m.end)};
+const walkAt=(w,ms)=>{const k=S.walk;return!!(k&&k.parts.includes(w)&&k.start<=ms&&ms<k.end)};
+const awayAt=(w,ms)=>{const m=S.mis&&S.mis[w];return!!(m&&m.start<=ms&&ms<m.end)||walkAt(w,ms)};
 function ensure(){ensureProf();S.cond=S.cond||condInit();S.memc=S.memc||{};S.fs=S.fs||{};S.notes=S.notes||[];S.itemInfo=S.itemInfo||{};S.firsts=S.firsts||{move_in:S.start};S.frev=S.frev||{};S.mis=S.mis||{b:null,c:null};S.inj=S.inj||{b:null,c:null};S.items=S.items||{};S.pendRet=S.pendRet||[];S.injF=S.injF||{};if(S.kit==null)S.kit=!!(S.props&&S.props.kit)}
 function rollItems(dur){const md=MD[dur],got=[];const n=1+(Math.random()<(md.bp||0)?1:0);for(let i=0;i<n;i++){const un=ITEMS.filter(it=>!S.items[it[0]]&&!got.includes(it[0]));let id;if(un.length&&Math.random()<md.pn)id=un[Math.floor(Math.random()*un.length)][0];else id=ITEMS[Math.floor(Math.random()*ITEMS.length)][0];got.push(id)}return got}
 function rollInjury(dur){const md=MD[dur];if(Math.random()>=md.pi)return 0;let r=Math.random(),a=0;for(let i=0;i<3;i++){a+=md.sev[i];if(r<a)return i+1}return 1}
@@ -672,7 +674,7 @@ function healInj(w,ms,how){
  if(how==='natural')logAt(ms,{id:'heal_'+w,t:`${NM[w]} 회복`,ty:'돌봄',l:HEAL[w][st>=2?1:0],f:false});
 }
 function applyTreat(w,ms){const i=S.inj[w];if(!i)return;S.kit=false;if(i.sev<=2){S.inj[w]=null;delete S.injF[w]}else{S.inj[w]={sev:1,since:ms,until:ms+3*H}}}
-function processTime(ms){for(const w of['b','c']){const m=S.mis[w];if(m&&m.end<=ms)resolveMission(w);const i=S.inj[w];if(i&&i.until<=ms)healInj(w,i.until,'natural')}}
+function processTime(ms){if(S.walk&&S.walk.end<=ms)resolveWalk();for(const w of['b','c']){const m=S.mis[w];if(m&&m.end<=ms)resolveMission(w);const i=S.inj[w];if(i&&i.until<=ms)healInj(w,i.until,'natural')}}
 
 
 /* ═════════ 컨디션 · 돌봄 · 기억 · 메모 · 기념일 ═════════ */
@@ -724,7 +726,7 @@ const NOTES={
     ['버키, 책상 위에 있는 거 네 거야?','오늘은 내가 저녁 담당.','너무 늦게까지 깨어 있지 마.','자두 사 옴. 다 먹지 마. (다 먹어도 됨)','오늘 순찰 같이 갈래? 갈 거면 깨워.'],
     ['일어나면 깨워. 안 깨우면 삐짐.','오늘 임무 조심해. 멀쩡하게 와.','네 머그컵 내가 씀. 미안 (안 미안)','어제 그거, 또 하자. (설거지 같이 한 거)','보고 싶어서 일찍 옴. (근데 네가 없음)','오늘 밤에 별 보러 지붕 올라가자.']]
 };
-const FIRSTS=[['move_in','은신처에 처음 들어온 날',0],['first_meal','처음으로 함께 식사한 날',1],['first_name','처음으로 서로의 이름을 부른 날',0],['first_treat','처음으로 상대방을 치료해 준 날',1],['first_joint','처음으로 함께 임무에 나간 날',0],['first_hand','처음으로 손을 잡은 날',1],['couple','연인이 된 날',0],['first_kiss','첫 키스',1]];
+const FIRSTS=[['move_in','은신처에 처음 들어온 날',0],['first_meal','처음으로 함께 식사한 날',1],['first_name','처음으로 서로의 이름을 부른 날',0],['first_treat','처음으로 상대방을 치료해 준 날',1],['first_joint','처음으로 함께 임무에 나간 날',0],['first_hand','처음으로 손을 잡은 날',1],['couple','연인이 된 날',0],['first_kiss','첫 키스',1],['dog','럭키가 온 날',0]];
 const FIRSTMAP={p_ends:'first_meal',prop_food:'first_meal',p_eat:'first_meal',m_name:'first_name',ptreat_b:'first_treat',ptreat_c:'first_treat',p_cut:'first_treat',p_thumb:'first_hand',p_play:'first_hand',p_door:'first_hand',p_reach:'first_hand',m_conf:'couple'};
 function markFirst(k,hk,ent){if(S.firsts[k])return;S.firsts[k]=hk;if(ent)ent.first=k;const d=FIRSTS.find(f=>f[0]===k);if(d&&!d[2])toast('기념일 · '+d[1])}
 function addNote(w,text,hk,pin){S.notes.push({h:hk,w,t:text,pin:!!pin});if(S.notes.length>40){const i=S.notes.findIndex(n=>!n.pin);S.notes.splice(i,1)}}
@@ -801,6 +803,7 @@ function roomText(){
  if(st>=5)c.push('지금은 장비실처럼 쓴다. 활과 화살이 깔끔하게 정리되어 있다. 정리는 버키가 했다.');
  R.push(['클린트의 방',c]);
  const l=['낡은 소파, 안락의자, 난로, 그리고 멈추지 않는 라디오.'];
+ if(S.dog&&S.dog.named)l.push('난로 앞에 럭키의 방석. 금색 털이 잔뜩 묻어 있다. 부엌 구석엔 ARROW라고 적힌 낡은 이름표가 걸린 밥그릇.');
  if(g.g_scarf)l.push('현관 옷걸이에 회색 목도리가 걸려 있다.');
  if(g.g_key)l.push('현관 열쇠 걸이에 열쇠고리 하나. 열쇠가 두 개 꿰어져 있다.');
  if(g.g_photo)l.push('냉장고 문에 흐릿한 즉석 사진이 붙어 있다.');
@@ -931,6 +934,69 @@ function timelineSheet(w,mm,full){
  $('okT').onclick=()=>{clearInterval(tlTimer);closeSheet();if(full)setTimeout(showReturns,250)};
 }
 
+
+/* ═════════ 럭키 ═════════ */
+const DOG_ARRIVE=x=>['오후 짧은 임무를 나갔던 클린트가 돌아왔다. 그런데 혼자가 아니었다.','클린트 뒤로 골든 리트리버 한 마리가 꼬리를 흔들며 따라 들어왔다. 털이 엉망이었다.','"……뭐지." 버키가 개와 클린트를 번갈아 봤다.','"골목에서 웬 놈들이 얘한테 돌을 던지고 있더라고. 좀 혼내 줬지." 클린트가 어깨를 으쓱했다. "주인은 없어. 근처를 다 찾아봤는데."','클린트가 개 목걸이를 뒤집어 보여 줬다. 낡은 이름표에 ARROW라고 적혀 있었다.','"화살이래. 화살. 이건 운명이잖아."','버키는 한참 말이 없었다. 개가 다가와 버키의 금속 손 냄새를 맡았다. 버키는 손을 빼지 않았다.',x.st>=4?'"……씻겨야겠군." 버키는 그렇게 말하면서, 벌써 수건을 가지러 가고 있었다.':'"……씻겨야겠군."'];
+const DOG_NAME=x=>['깨끗하게 씻은 개가 난로 앞에서 털을 말리고 있다. 둘은 그 앞에 쭈그려 앉았다.','"이름 새로 지어 주자. 애로우는 너무 내 거 같잖아."','"알파인."','"……뭐?"','"알파인. 높은 산 이름이다. 잘 어울린다."','"얘 금색이거든? 그리고 너무 진지해. 럭키 어때. 럭키."'].concat(S.seen.p_dawntalk?['버키가 클린트를 봤다. "……그거, 그때 네가 말했던 이름이군. 개 이름이 아니라 소원이라던."','"그러니까. 이제 소원 이뤘잖아."']:['"너무 흔하다."','"흔한 게 좋은 거야. 행운이 흔하면 좋잖아."']).concat(['둘이 동시에 개를 봤다. "알파인." 버키가 불렀다. 개는 하품을 했다.','"럭키!" 클린트가 불렀다. 개가 벌떡 일어나 클린트의 얼굴을 핥았다.','"……봐. 얘가 골랐어."','버키는 졌다는 듯 숨을 내쉬었다. 그래도 그날 밤, 럭키의 방석을 난로 앞 제일 따뜻한 자리에 깔아 준 건 버키였다.']);
+const DOGEV=[
+ {id:'d_tug',t:'터그 놀이',sl:['late','aft','dusk','eve'],l:['클린트가 럭키와 터그 놀이를 했다. 밧줄 장난감을 사이에 두고 둘이 한참 으르렁거렸다.','진 건 클린트였다.']},
+ {id:'d_sit',t:'앉아',sl:['late','aft','dusk'],hb:'b_dog',l:['버키가 럭키에게 앉아 훈련을 시켰다. "앉아." 럭키가 앉았다.','버키는 아무 표정 없이 간식을 하나 줬다. 그리고 몰래 하나 더 줬다.']},
+ {id:'d_nap',t:'같은 자세',sl:['aft'],hb:'c_dog',l:['클린트와 럭키가 소파에서 같이 낮잠을 잤다. 둘 다 입을 조금 벌리고, 똑같은 자세로.','버키는 그걸 한참 보다가, 담요를 둘 위에 한꺼번에 덮어 줬다.']},
+ {id:'d_ball',t:'마흔 번째 공',sl:['late','aft','dusk'],l:['클린트가 공을 던지면 럭키가 물어 오고, 다시 던지면 또 물어 왔다.','마흔 번째쯤 클린트가 먼저 지쳤다. 럭키는 공을 버키 앞에 내려놓았다. 버키가 던진 공은 마당 끝까지 날아갔다.']},
+ {id:'d_brush',t:'빗질',sl:['eve','night'],l:['버키가 난로 앞에서 럭키의 털을 빗겨 줬다. 럭키는 눈을 감고 꼬리만 천천히 흔들었다.','빗질이 끝났을 때 버키의 검은 셔츠는 금색이 되어 있었다.']},
+ {id:'d_shoe',t:'신발 도둑',sl:['morn','late'],l:['럭키가 버키의 군화 한 짝을 물고 도망갔다. 버키는 쫓아가지 않았다.','대신 클린트의 운동화를 들어 보였다. 럭키는 즉시 군화를 내려놓고 운동화로 갈아탔다.','"야!"']},
+ {id:'d_arm',t:'차가운 손',sl:['late','aft','eve'],l:['럭키가 버키의 금속 손을 핥았다. 차가운 게 신기한 모양이었다.','버키는 한참 그대로 손을 내주고 있었다. 그 손을 그렇게 아무렇지 않게 대하는 건, 클린트 말고는 처음이었다.']},
+ {id:'d_between',t:'둘 사이',sl:['eve','night'],st:3,l:['TV를 보는 둘 사이로 럭키가 비집고 들어와 누웠다.','"야, 거기 내 자리…" 클린트가 투덜대다가 그냥 럭키를 쓰다듬었다. 버키도 반대쪽에서 쓰다듬고 있었다.','손이 럭키 등 위에서 부딪혔다. 아무도 손을 치우지 않았다.']},
+ {id:'d_thunder',t:'천둥 치는 밤',c:x=>x.w==='storm',w:4,l:['천둥이 치자 럭키가 낑낑대며 클린트에게 파고들었다.','"괜찮아, 괜찮아." 클린트가 럭키를 끌어안았다. 그 말은 반쯤은 자기한테 하는 말이었다.','버키가 말없이 커튼을 치고, 클린트 옆에 앉아 럭키의 등을 쓸었다.']},
+ {id:'d_train',t:'무릎 위의 턱',sl:['deep','night'],hb:'b_dog',l:['멀리서 기차 소리가 났다. 잠들지 못하던 버키의 무릎 위에, 럭키가 턱을 올려놓았다.','버키는 기차가 다 지나갈 때까지 럭키의 귀를 천천히 쓸었다.']},
+ {id:'d_secret',t:'비밀',sl:['late','aft','dusk'],hb:'b_dog',l:['버키가 럭키에게 뭔가를 낮게 이야기하고 있었다. 클린트가 다가가자 뚝 멈췄다.','"뭐라고 했어?"','"……비밀이다."','럭키는 꼬리를 흔들었다. 아는 얼굴이었다.']},
+ {id:'d_snack',t:'식탁 밑',sl:['eve','dusk','lunch'],l:['클린트가 식탁 밑으로 몰래 소시지를 내려줬다. 버키와 눈이 마주쳤다.','"……봤어?"','"응."','버키도 식탁 밑으로 손을 내렸다.']},
+ {id:'d_bath',t:'목욕 시간',sl:['aft','dusk'],l:['럭키 목욕 시간.','십 분 뒤, 욕실에서 나온 건 깨끗한 개 한 마리와 흠뻑 젖은 남자 두 명이었다.']},
+ {id:'d_guard',t:'문 앞의 럭키',sl:['deep'],l:['럭키가 침실 문 앞에 몸을 말고 잠들었다. 문을 지키듯이.','물을 마시러 나온 버키가 그걸 보고, 아주 조금 웃었다.']},
+ {id:'d_snow',t:'첫 눈밭',c:x=>x.w==='snow',w:3,sl:['late','aft','dusk'],l:['럭키가 눈밭에서 미친 듯이 뛰어다녔다. 클린트도 같이 뛰었다.','버키는 현관에 서서 둘 다 감기 걸리겠다고 생각했다. 그리고 수건 두 장을 꺼내 왔다.']}
+];
+const DOGNOTES={b:['럭키 밥 줬다. 또 달라고 해도 주지 마.','럭키 발 닦아 놨다. 소파에 올리지 마라.','럭키가 네 양말 물어 갔다. 난 못 봤다.'],c:['럭키 산책 다녀옴. 진흙 묻은 건 내가 닦을게.','럭키한테 간식 안 줬음. (줬음)','럭키가 네 자리에서 자고 있어서 안 깨웠어.']};
+const WALKL={s:{b:'버키가 목줄을 잡고 럭키와 문을 나섰다. 럭키가 앞장서서 버키를 끌고 갔다.',c:'클린트가 "산책 갈 사람?" 하자 럭키가 현관까지 미끄러지듯 달려갔다.',j:'버키와 클린트가 럭키를 데리고 나섰다. 목줄은 클린트가, 비닐봉지는 버키가 들었다.'},
+ dog:['럭키가 나비를 쫓아갔다. 당연히 못 잡았다.','럭키가 풀숲에 코를 박고 한참 냄새를 맡았다.','럭키가 지나가는 비둘기에게 짖었다. 비둘기는 무시했다.','럭키가 웅덩이를 발견하고 그대로 뛰어들었다.','럭키가 나뭇가지 하나를 물어 왔다. 자기 몸보다 길었다.','럭키가 낯선 강아지와 코를 맞대고 인사했다.','럭키가 잔디밭에서 등을 대고 뒹굴었다.','럭키가 분수 앞에서 꼬리를 미친 듯이 흔들었다.','럭키가 길고양이를 보고 얼어붙었다. 고양이가 이겼다.','럭키가 벤치 밑에서 테니스공을 찾아냈다. 오늘의 보물이다.','럭키가 낙엽 더미에 얼굴을 파묻었다.','럭키가 지나가던 아이의 손을 핥았다. 아이가 꺄르르 웃었다.'],
+ b:['버키가 럭키에게 "기다려."라고 했다. 럭키는 기다리지 않았다.','버키가 럭키의 목줄을 짧게 고쳐 잡았다. 차가 지나간다.','버키가 나뭇가지를 던져 줬다. 생각보다 멀리 날아가서 럭키가 한참 걸려 돌아왔다.','버키가 지나가던 아이에게 럭키를 쓰다듬게 해 줬다. 아이가 웃자 버키도 아주 조금 웃었다.','버키가 벤치에 앉아 럭키의 귀 뒤를 긁어 주었다. 둘 다 눈을 반쯤 감았다.','버키가 비닐봉지를 꺼냈다. 산책의 가장 현실적인 순간이다.','버키가 럭키에게 낮게 말을 걸었다. 무슨 말인지는 럭키만 안다.'],
+ c:['클린트가 럭키와 달리기 시합을 했다. 졌다.','클린트가 럭키에게 "손!" 하자 럭키가 앞발을 줬다. 클린트가 지나가던 사람에게 자랑했다.','클린트가 공을 던지는 척만 했다. 럭키가 속아서 달려갔다가 돌아와 클린트를 원망스럽게 봤다.','클린트가 럭키 사진을 찍었다. 스무 장. 전부 흔들렸다.','클린트가 벤치에 앉자 럭키가 무릎에 올라왔다. 덩치를 생각하면 불가능한 일이었다.','클린트가 핫도그를 사 먹었다. 반은 럭키가 먹었다.','클린트가 럭키에게 버키 흉을 봤다. 럭키는 다 들어 줬다.'],
+ pda:['버키와 클린트가 벤치에 앉았다. 럭키가 공원에서 뛰어노는 것을 보며 한참 동안 손을 잡고 있었다.','럭키가 목줄을 감고 둘 사이를 빙글빙글 돌았다. 둘은 꼼짝없이 묶여 서로에게 붙었다. 클린트가 웃으며 그대로 버키에게 입을 맞췄다.','버키가 클린트의 머리에 붙은 나뭇잎을 떼어 줬다. 손이 잠깐 뺨에 머물렀다.','클린트가 버키의 팔짱을 꼈다. "럭키 보는 척하면 아무도 몰라." 버키는 팔을 빼지 않았다.','바람이 불자 버키가 말없이 클린트의 목깃을 여며 주었다. 클린트가 그 손을 잡고 손등에 입을 맞췄다.','둘의 눈이 마주쳤다. 아무도 먼저 피하지 않았다. 럭키가 짖고 나서야 둘 다 웃었다.','클린트가 농담을 했다. 재미없었다. 그런데 버키가 웃었다. 클린트가 더 크게 웃었다.','나무 그늘 아래서 버키가 클린트를 뒤에서 안았다. 턱을 어깨에 얹고, 럭키가 뛰어노는 걸 같이 봤다.','"우리 셋, 가족 같지 않아?" 클린트가 장난처럼 물었다. 버키는 대답 대신 클린트의 손을 꽉 쥐었다. 그게 대답이었다.','럭키가 공을 물어 오자 둘이 동시에 손을 내밀었다. 손이 겹쳤다. 아무도 빼지 않았다. 럭키는 공을 내려놓고 기다렸다.','클린트가 벤치에서 꾸벅 졸다가 버키 어깨에 기댔다. 버키는 럭키 목줄을 쥔 채 한참 그대로 있었다.','버키가 아이스크림을 하나 사 왔다. 숟가락은 두 개. 클린트가 버키 입가에 묻은 걸 엄지로 닦아 줬다.','클린트가 갑자기 버키 볼에 입을 맞추고 럭키와 같이 도망쳤다. 버키는 천천히 걸어서 따라갔다. 입꼬리가 올라가 있었다.','"너 웃는 거 오늘 몇 번째인지 알아?" "세지 마." "일곱 번." 버키가 클린트의 입을 손으로 막았다. 클린트가 그 손바닥에 입을 맞췄다.'],
+ e:{b:'버키가 럭키를 데리고 은신처로 돌아오는 길이다. 럭키는 아직 기운이 넘친다.',c:'클린트가 지친 럭키를 데리고 돌아오는 중이다. 사실 더 지친 건 클린트다.',j:'셋이 나란히 은신처로 돌아가는 길이다. 클린트가 버키의 손을 잡고 있다. 목줄은 언제 버키에게 넘어갔는지 모르겠다.'}};
+const dogHome=ms=>!!(S.dog&&S.dog.named&&!(S.walk&&S.walk.start<=ms&&ms<S.walk.end));
+const dogFull=()=>S.dog&&S.dog.food>Date.now();
+function walkTimeline(k){
+ const rng=mulb(k.seed||7),joint=k.parts.length>1,out=[],R=(a,b)=>a+(b-a)*rng(),used={};
+ const pick=(arr,key)=>{used[key]=used[key]||[];let av=arr.map((_,i)=>i).filter(i=>!used[key].includes(i));if(!av.length){used[key]=[];av=arr.map((_,i)=>i)}const i=av[Math.floor(rng()*av.length)];used[key].push(i);return arr[i]};
+ const w=k.parts[0];out.push({t:k.start,x:joint?WALKL.s.j:WALKL.s[w],c:''});
+ let t=k.start;while(true){t+=R(3,10)*60e3;if(t>=k.end-3*60e3)break;const r=rng();
+  if(joint){if(r<.42)out.push({t,x:pick(WALKL.pda,'pda'),c:'j'});else if(r<.78)out.push({t,x:pick(WALKL.dog,'dog'),c:''});else{const q=rng()<.5?'b':'c';out.push({t,x:pick(WALKL[q],q),c:''})}}
+  else out.push({t,x:r<.5?pick(WALKL.dog,'dog'):pick(WALKL[w],w),c:''})}
+ out.push({t:k.end-R(1,3)*60e3,x:joint?WALKL.e.j:WALKL.e[w],c:joint?'j':''});return out}
+function resolveWalk(){const k=S.walk;S.walk=null;const joint=k.parts.length>1;
+ for(const p of k.parts){S.cond[p].fat=Math.max(0,S.cond[p].fat-2.5);S.cond[p].str=Math.max(0,S.cond[p].str-3)}
+ const lines=joint?['셋이 산책에서 돌아왔다. 럭키는 물그릇에 코를 박았고, 둘은 현관에서 서로의 신발에 묻은 흙을 털어 줬다.','둘 다 나갈 때보다 훨씬 편안한 얼굴이었다.']:[`${JOSA(NM[k.parts[0]],'이','가')} 럭키와 산책에서 돌아왔다. 기분이 한결 나아 보인다.`];
+ logAt(k.end,{id:'walk',t:joint?'셋이 함께 산책':'럭키와 산책',ty:joint?'스킨십':'일상',l:lines,f:false});S.lastWalk=k;toast(joint?'둘이 럭키와 산책에서 돌아왔어요':`${JOSA(NM[k.parts[0]],'이','가')} 럭키와 산책에서 돌아왔어요`)}
+function walkSheet(){
+ const now=Date.now(),st=stage(),ok=w=>!S.mis[w]&&!(S.inj[w]&&S.inj[w].sev>=2)&&!(w==='c'&&S.clintOut);
+ const o=[];if(ok('b'))o.push(['b','버키와 산책','버키가 럭키를 데리고 1시간 동안 산책해요.']);if(ok('c'))o.push(['c','클린트와 산책','클린트가 럭키를 데리고 1시간 동안 산책해요.']);
+ if(st>=4&&ok('b')&&ok('c'))o.push(['both','셋이 함께 산책','버키와 클린트가 같이 나가요.']);
+ if(!o.length){toast('지금은 산책을 데려갈 사람이 없어요');return}
+ sheet(`<h2>럭키 산책</h2><div class="sub">산책은 1시간. 다녀오면 피로와 스트레스가 조금 풀려요.${st<4?' 함께 산책은 두 사람이 연인이 된 뒤에 할 수 있어요.':''}</div><div class="opts">${o.map(([k,n,d])=>`<button class="btn" data-wk="${k}"><span class="dur"><span><b>${n}</b><small>${d}</small></span></span></button>`).join('')}<button class="btn" data-wk="x">그만두기</button></div>`);
+ document.querySelectorAll('[data-wk]').forEach(b=>b.onclick=()=>{const k=b.dataset.wk;closeSheet();if(k==='x')return;
+  const parts=k==='both'?['b','c']:[k];S.walk={start:now,end:now+H,parts,seed:Math.floor(Math.random()*2e9)};
+  S.log.push({h:nowHK(),id:'walkdep',t:parts.length>1?'둘이 럭키를 데리고 산책을 나갔다.':`${JOSA(NM[k],'이','가')} 럭키를 데리고 산책을 나갔다.`,ty:'일상',f:true});
+  resp(parts.length>1?WALKL.s.j:WALKL.s[k]);addBonus();save();renderHome()});
+}
+function walkLogSheet(k,full){
+ k=k||S.walk;if(!k){toast('지금은 산책 중이 아니에요');return}
+ const draw=()=>{const now=Date.now(),vis=walkTimeline(k).filter(e=>full||e.t<=now);const box=$('tlBox');if(!box){clearInterval(tlTimer);return}
+  box.innerHTML=vis.map(e=>`<div class="e ${e.c}"><b>[${hm(e.t)}]</b>${esc(e.x)}</div>`).join('')+(full||!S.walk?'':'<div class="wait">… 산책 중</div>');box.scrollTop=box.scrollHeight;
+  $('tlSub').textContent=full?`${hm(k.start)} 출발 · ${hm(k.end)} 귀환`:`${hm(k.start)} 출발 · 돌아오기까지 ${fmtLeft(k.end-now)}`};
+ sheet(`<h2>${k.parts.length>1?'셋이 함께 산책':NM[k.parts[0]]+' & 럭키 산책'}</h2><div class="sub" id="tlSub"></div><div class="tl" id="tlBox"></div><div class="opts" style="margin-top:12px"><button class="btn" id="okT">닫기</button></div>`);
+ draw();clearInterval(tlTimer);if(!full)tlTimer=setInterval(()=>{if(!$('modal').classList.contains('on')){clearInterval(tlTimer);return}draw()},10000);
+ $('okT').onclick=()=>{clearInterval(tlTimer);closeSheet()};
+}
+
 /* ═════════ 말 걸기 ═════════ */
 const TALK={
  b:[['버키가 고개를 든다. 주위를 한 번 둘러보고, 다시 하던 일로 돌아간다.','"……누구 있나." 대답이 없자, 버키는 문 쪽을 한참 응시했다.','버키의 손이 습관처럼 허리춤으로 갔다가 멈춘다. 아무것도 없다는 걸 확인하고 나서야.'],
@@ -961,6 +1027,7 @@ function runHour(hk){
  updCond(hk);
  let noPool=false;const hms=hourMs(hk)+60e3;
  const awB=awayAt('b',hms),awC=awayAt('c',hms);
+ if(!ev&&S.walk&&S.walk.start<=hms&&hms<S.walk.end){noPool=true;const j=S.walk.parts.length>1,w=S.walk.parts[0];if(Math.random()<.6){ev={id:'walkabs',t:j?'셋이 나간 오후':'산책 나간 사이',ty:'일상'};lines=j?['셋이 산책을 나가서 은신처가 조용하다. 럭키의 빈 방석 위로 햇빛만 들어온다.']:[w==='b'?'버키가 럭키를 데리고 산책을 나갔다. 클린트는 창가에서 둘이 멀어지는 걸 봤다.':'클린트가 럭키를 데리고 산책을 나갔다. 은신처가 갑자기 넓어진 것 같다. 버키는 책을 펼쳤다.']}}
  if(!ev&&(awB||awC)){noPool=true;
   if(awB&&awC){if(Math.random()<.5){ev={id:'abs_both',t:'빈 은신처',ty:'일상'};lines=['두 사람 모두 임무를 나갔다. 은신처가 비었다. 난로만 혼자 탄다.']}}
   else{const w=awB?'b':'c';if(Math.random()<.55){ev={id:'abs_'+w,t:`${JOSA(NM[w],'이','가')} 없는 시간`,ty:'일상'};lines=ABS[w][grp3(x.st)]}}}
@@ -975,6 +1042,10 @@ function runHour(hk){
   if(cand.length){const e=cand[Math.floor(Math.random()*cand.length)];ev={id:e.id,t:{cr_batt:'보청기 배터리',cr_stove:'장작 두 개',cr_bow:'정리된 화살',cr_water:'물 한 잔',cr_cover:'덮어 둔 아침',cr_armkit:'관리 도구',cr_insom:'잠 못 드는 밤',cr_tired:'오늘은 내가',cr_strb:'창가의 커피',cr_strc:'농담이 많은 날'}[e.id],ty:'돌봄'};lines=e.l(x);if(e.fx)e.fx(x);S.memc[e.mem]=(S.memc[e.mem]||0)+1;if(S.memc[e.mem]>=e.need)unlock(x,{hb:e.hb})}}
  if(!ev&&!awB&&!awC&&!noPool&&Math.random()<.3){const cand=CALLBACK.filter(e=>!S.seen[e.id]&&x.st>=e.st&&S.fs[e.after]&&hk-S.fs[e.after]>=e.days*24&&e.sl.includes(x.slot));
   if(cand.length){mk(cand[0])}}
+ if(!ev&&S.dog&&!S.dog.named&&!awB&&!awC){S.dog.named=true;ev={id:'m_dogname',t:'알파인, 아니면 럭키',ty:'특별'};lines=DOG_NAME(x)}
+ if(!ev&&!S.dog&&x.st>=3&&!awB&&!awC&&!S.inj.c&&!S.clintOut&&['aft','dusk'].includes(x.slot)&&Math.random()<.3){S.dog={since:hk,food:hms+12*H,named:false};S.ms.m_dog=hk;ev={id:'m_dog',t:'ARROW',ty:'특별'};lines=DOG_ARRIVE(x)}
+ if(!ev&&S.dog&&S.dog.named&&dogHome(hms)&&!awB&&!awC&&S.dog.food<hms&&!['deep'].includes(x.slot)&&Math.random()<.55){const w=Math.random()<.6?'b':'c';S.dog.food=hms+12*H;ev={id:'d_feed',t:'빈 밥그릇',ty:'돌봄'};lines=w==='b'?['럭키가 빈 밥그릇을 코로 밀며 버키를 쳐다봤다.','버키는 아무 말 없이 사료를 가득 채웠다. "……천천히 먹어."']:['럭키가 밥그릇을 물고 와 클린트 앞에 내려놓았다.','"아, 미안미안! 깜빡했다!" 클린트가 사료를 두 그릇 분량으로 부었다. 지나가던 버키가 반을 덜어냈다.']}
+ if(!ev&&S.dog&&S.dog.named&&dogHome(hms)&&!awB&&!awC&&!noPool&&Math.random()<.25){const cand=DOGEV.filter(e=>(!e.sl||e.sl.includes(x.slot))&&(!e.c||e.c(x))&&(!e.st||x.st>=e.st)&&!S.recent.includes(e.id));if(cand.length)mk(wpick(cand))}
  if(!ev&&!(awB||awC))for(const m of MILESTONES){if(!S.ms[m.id]&&x.st>=m.st&&(!m.minPts||S.pts>=m.minPts)&&m.sl.includes(x.slot)&&!(m.id==='m_late'&&S.couple!=null)){S.ms[m.id]=hk;mk(m);break}}
  if(!ev)for(const sp of SPECIAL){const key=sp.id+':'+(x.m===1&&sp.id==='ny'?hkd(hk).y:hkd(hk).y);if(!S.done[key]&&sp.c(x)){S.done[key]=hk;mk(sp,'특별');break}}
  if(!ev&&x.h===20){for(const[k,n]of FIRSTS){const f=S.firsts[k];if(f==null||k==='couple')continue;const dd=dayOf(hk)-dayOf(f);if(dd>0&&dd%365===0&&!S.done['an_'+k+dd]){S.done['an_'+k+dd]=1;ev={id:'an_'+k,t:`${dd/365}년 전 오늘`,ty:'특별'};lines=[`${dd/365}년 전 오늘은 「${n}」이었다.`,x.st>=4?'둘 중 누구도 날짜를 말하지 않았다. 그런데 저녁 식탁엔 평소보다 반찬이 하나 더 있었고, 클린트는 이유를 묻지 않았다.':'아무도 그 날짜를 기억하지 못하는 것 같았다. 버키의 수첩에 적힌 동그라미 하나를 빼면.'];break}}}
@@ -1004,10 +1075,11 @@ function runHour(hk){
  if(!f){S.seen[ev.id]=(S.seen[ev.id]||0)+1;S.recent.unshift(ev.id);S.recent=S.recent.slice(0,14)}
  const ent={h:hk,id:ev.id,t:ev.t,ty:ev.ty,l:lines,f};
  if(!f&&!S.fs[ev.id])S.fs[ev.id]=hk;
+ if(!f&&ev.id==='m_dogname')markFirst('dog',hk,ent);
  if(!f&&FIRSTMAP[ev.id]){markFirst(FIRSTMAP[ev.id],hk,ent);if(ev.id==='m_conf')S.firsts.first_kiss=S.firsts.first_kiss||hk}
  if([8,13,18,23].includes(x.h)&&Math.random()<.22){const ws=['b','c'].filter(w=>!awayAt(w,hms));if(ws.length){const w=ws[Math.floor(Math.random()*ws.length)];
    if(x.st>=4&&!S.loveNote&&w==='c'&&x.h===18&&Math.random()<.5){S.loveNote=hk;S.notes.push({h:hk,w:'c',t:'사랑해.\n냉장고에 파스타 있어. 데워 먹어.',love:true,pin:false})}
-   else{const rec=S.notes.slice(-6).map(n=>n.t);const pool=NOTES[w][grp3(x.st)].filter(t=>!rec.includes(t));if(pool.length)addNote(w,pool[Math.floor(Math.random()*pool.length)],hk)}}}
+   else{const rec=S.notes.slice(-6).map(n=>n.t);const pool=(S.dog&&S.dog.named&&Math.random()<.35?DOGNOTES[w]:NOTES[w][grp3(x.st)]).filter(t=>!rec.includes(t));if(pool.length)addNote(w,pool[Math.floor(Math.random()*pool.length)],hk)}}}
  S.log.push(ent);return ent;
 }
 function catchUp(){
@@ -1030,7 +1102,7 @@ function wallc(h){if(h>=21||h<5)return['#1a1c24','#14161c'];if(h<8)return['#2b2d
 function snap(){
  const hk=nowHK(),t=hkd(hk),s=sched(hk);
  return{h:t.h,mi:new Date(Date.now()+KST).getUTCMinutes(),w:weatherAt(hk),season:seasonOf(t.m),m:t.m,st:stage(),b:s.b,c:s.c,
-  p:{coffee:!!S.props.coffee,food:!!S.props.food,blanket:!!S.props.blanket,stove:!!S.props.stove||(seasonOf(t.m)==='겨울'&&(t.h>=17||t.h<1)),radio:S.props.radioCh||'',kit:!!S.kit,window:!!S.props.window,book:!!S.props.book,bow:!!S.props.bow}};
+  p:{coffee:!!S.props.coffee,food:!!S.props.food,blanket:!!S.props.blanket,stove:!!S.props.stove||(seasonOf(t.m)==='겨울'&&(t.h>=17||t.h<1)),radio:S.props.radioCh||'',kit:!!S.kit,window:!!S.props.window,book:!!S.props.book,bow:!!S.props.bow,dog:S.dog&&S.dog.named?{here:dogHome(Date.now()),full:!!dogFull(),sleep:t.h>=23||t.h<7}:null}};
 }
 function sceneSVG(sn,uid){
  const{h,w,season,m,st,b,c,p}=sn,[w1,w2]=wallc(h),night=h>=21||h<5,lamp=h>=17||h<1;
@@ -1081,6 +1153,11 @@ function sceneSVG(sn,uid){
  // 어둠
  if(night)o+=`<rect width="360" height="220" fill="#05070c" opacity="${lamp?.25:.45}"/>`;
  if(night&&lamp)o+=`<circle cx="315" cy="104" r="60" fill="url(#lp${uid})"/>`;
+ // 럭키
+ if(p.dog){o+=`<ellipse cx="62" cy="208" rx="7" ry="2.6" fill="#8a6a4a"/>${p.dog.full?'<ellipse cx="62" cy="206.8" rx="5" ry="1.4" fill="#b98a4a"/>':''}`;
+  if(p.dog.here){const[dx,dy]=p.dog.sleep?[300,200]:!p.dog.full?[78,200]:[262,201];const col='#d9a35b';
+   o+=p.dog.sleep?`<g><ellipse cx="${dx}" cy="${dy}" rx="11" ry="5" fill="${col}"/><circle cx="${dx-9}" cy="${dy-2}" r="4.5" fill="${col}"/><ellipse cx="${dx-10}" cy="${dy-1}" rx="2" ry="3" fill="#b9853f"/><text x="${dx+4}" y="${dy-8}" font-size="7" fill="#cfd6e0" font-family="sans-serif">z</text></g>`
+   :`<g><ellipse cx="${dx}" cy="${dy}" rx="11" ry="5.5" fill="${col}"/><rect x="${dx-8}" y="${dy+2}" width="2.5" height="6" fill="${col}"/><rect x="${dx+5}" y="${dy+2}" width="2.5" height="6" fill="${col}"/><circle cx="${dx-11}" cy="${dy-5}" r="5" fill="${col}"/><ellipse cx="${dx-15}" cy="${dy-4}" rx="3" ry="1.8" fill="${col}"/><ellipse cx="${dx-10}" cy="${dy-3}" rx="2" ry="3.2" fill="#b9853f"/><circle cx="${dx-12.5}" cy="${dy-6}" r=".8" fill="#2a2018"/><path d="M${dx+10} ${dy-2} q6 -6 4 -10" stroke="${col}" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>`}}
  // 사람
  const pp=[];const place=(who,s)=>{if(s.loc==='out')return null;let[xx,yy]=POS[s.loc];return[xx,yy]};
  let bp=place('b',b),cp=place('c',c);
@@ -1163,6 +1240,7 @@ function acts(){
   {id:'move',ic:'📦',l:'물건 옮기기',sub:''},
   {id:'talkB',ic:'💬',l:'버키에게 말 걸기',sub:''},
   {id:'talkC',ic:'💬',l:'클린트에게 말 걸기',sub:''},
+  ...(S.dog&&S.dog.named?[{id:'dogfood',ic:'🦴',l:'개 사료 채우기',sub:dogFull()?'가득 참':'비어 있음',dis:dogFull()}]:[]),
   {id:'photo',ic:'📷',l:'지금 이 순간 찍기',sub:`앨범 ${S.photos.length}/60`,dis:S.photos.length>=60}
  ];
 }
@@ -1188,6 +1266,7 @@ function doAct(id){
   else if(me.sleep)resp(who==='b'?'버키는 자고 있다. 아주 잠깐 미간이 찌푸려졌다가, 다시 풀린다.':'클린트는 자고 있다. 보청기를 뺀 채라 아무것도 듣지 못한다.');
   else{const a=TALK[who][g];let line=a[Math.floor(Math.random()*a.length)];if(g===0)line=line.replace('반즈',names().B);resp(line)}
   return}
+ if(id==='dogfood'){S.dog.food=Date.now()+12*H;addBonus();resp('럭키 밥그릇에 사료를 가득 채웠다. 럭키가 꼬리를 프로펠러처럼 돌렸다.')}
  if(id==='photo'){const sn=snap();const cur=[...S.log].reverse().find(e=>e.h===hk);
   const t0=hkd(hk);let desc=`${t0.m}월 ${t0.d}일 ${pad(sn.h)}:${pad(sn.mi)} · ${WN[sn.w]} · ${sn.season}\n버키는 ${LOCN[sn.b.loc]}에서 ${sn.b.act}\n클린트는 ${LOCN[sn.c.loc]}에서 ${sn.c.act}`;
   if(cur&&!cur.f&&cur.l)desc+='\n\n'+cur.l.join(' ');
@@ -1203,18 +1282,22 @@ function renderMis(){
  const box=$('misBox');if(!box)return;const now=Date.now(),st=stage();let html='';
  for(const w of['b','c']){const m=S.mis[w],i=S.inj[w],col=w==='b'?'var(--blue)':'var(--plum)';
   let s1,cls='',btn='';
-  if(m){const over=m.origEnd&&now>m.origEnd&&m.end>m.origEnd;s1=`${MD[m.dur].n}${m.joint?' · 함께':''} · ${over?'예상보다 길어지는 중':'돌아오기까지 '+fmtLeft(m.end-now)}`;btn=`<button class="mini" data-pr="${w}">진행도</button>`}
+  if(S.walk&&S.walk.parts.includes(w)){s1=`럭키와 산책 중 · 돌아오기까지 ${fmtLeft(S.walk.end-now)}`;btn=`<button class="mini" data-wl="1">진행도</button>`}
+  else if(m){const over=m.origEnd&&now>m.origEnd&&m.end>m.origEnd;s1=`${MD[m.dur].n}${m.joint?' · 함께':''} · ${over?'예상보다 길어지는 중':'돌아오기까지 '+fmtLeft(m.end-now)}`;btn=`<button class="mini" data-pr="${w}">진행도</button>`}
   else if(i){cls='inj'+i.sev;const lh=Math.ceil((i.until-now)/H);s1=`부상(${SEVN[i.sev]}) · 자연 회복까지 약 ${lh}시간`;btn=`<button class="mini" data-tr="${w}">치료하기</button>`}
   else if(w==='c'&&S.clintOut){s1='아직 돌아오지 않았다'}
   else{s1='은신처에 있음';btn=`<button class="mini" data-go="${w}">임무 보내기</button>`}
   const av=AV[w]?`<img class="avs${AV['p'+w]?' pix':''}" style="border-color:${col}" src="${AV[w]}">`:`<i style="width:7px;height:7px;border-radius:50%;background:${col};display:inline-block"></i>`;
   html+=`<div class="mrow"><div class="mi"><div class="mn">${av}${NM[w]}</div><div class="ms ${cls}">${s1}</div></div><div class="mb">${btn}</div></div>`}
- const both=!S.mis.b&&!S.mis.c&&!S.inj.b&&!S.inj.c&&!S.clintOut;
+ const both=!S.mis.b&&!S.mis.c&&!S.inj.b&&!S.inj.c&&!S.clintOut&&!S.walk;
+ if(S.dog&&S.dog.named){const ds=S.walk?`산책 중 · 돌아오기까지 ${fmtLeft(S.walk.end-now)}`:!dogFull()?'배고파 보인다. 밥그릇이 비어 있다.':hkd(nowHK()).h>=23||hkd(nowHK()).h<7?'방석에서 자고 있다.':'꼬리를 흔들며 은신처를 돌아다닌다.';html+=`<div class="mrow"><div class="mi"><div class="mn"><i style="width:7px;height:7px;border-radius:50%;background:#d9a35b;display:inline-block"></i>럭키</div><div class="ms">${ds}</div></div><div class="mb">${S.walk?'<button class="mini" data-wl="1">진행도</button>':'<button class="mini" data-wk2="1">산책 보내기</button>'}</div></div>`}
  if(both&&st>=2)html+=`<div class="mrow"><div class="mi"><div class="mn">동행 임무</div><div class="ms">둘이 함께. 부상 위험이 조금 낮고, 한 명이 다치면 함께 돌아와요.</div></div><div class="mb"><button class="mini" data-go="both">함께 보내기</button></div></div>`;
  box.innerHTML=html;
  box.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>missionSheet(b.dataset.go));
  box.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>playerTreat(b.dataset.tr));
  box.querySelectorAll('[data-pr]').forEach(b=>b.onclick=()=>timelineSheet(b.dataset.pr));
+ box.querySelectorAll('[data-wl]').forEach(b=>b.onclick=()=>walkLogSheet());
+ box.querySelectorAll('[data-wk2]').forEach(b=>b.onclick=()=>walkSheet());
 }
 function missionSheet(w){
  const opts=[30,60,120,180].map(d=>{const md=MD[d];return`<button class="btn" data-d="${d}"><span class="dur"><span><b>${d<60?d+'분':(d/60)+'시간'} · ${md.n}</b><small>${md.d}</small></span><span class="r">부상 위험 ${md.risk}<br>새 물건 ${['드묾','가끔','자주','아주 자주'][[30,60,120,180].indexOf(d)]}${md.bp?' · 가끔 1개 더':''}</span></span></button>`}).join('');
