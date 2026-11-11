@@ -173,6 +173,9 @@ nav.tabs button.on{color:var(--amber)}
 .tl .e b{font-family:"Noto Sans KR",sans-serif;font-weight:500;font-size:11.5px;color:var(--amber);margin-right:6px}
 .tl .e.x{color:#e7b0a0}.tl .e.r{color:var(--blue)}.tl .e.j{color:#e6dcc4}
 .tl .wait{font-size:12px;color:var(--dim);padding:10px 0;font-family:"Noto Sans KR",sans-serif}
+.wish{font-size:12px;color:var(--amber);margin-top:5px;font-family:"Noto Serif KR",serif;line-height:1.5}
+.card p.pre{white-space:pre-line;color:var(--ink);font-family:"Noto Serif KR",serif}
+.code{width:100%;height:120px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px;font-size:11px;font-family:monospace;color:var(--dim);word-break:break-all}
 #ytBox{display:none;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:10px;gap:12px;align-items:stretch}
 #ytBox.on{display:flex}
 #ytWrap{width:200px;height:200px;flex:none;border-radius:8px;overflow:hidden;background:#000}
@@ -195,8 +198,8 @@ nav.tabs button.on{color:var(--amber)}
   <div class="scene" id="scene"><div id="svgHost"></div><canvas id="wx"></canvas><div class="wtag" id="wtag"></div></div>
   <div class="wsrc" id="wsrc"></div>
   <div class="who">
-   <div class="wc"><div class="n"><span id="bAv"></span>버키 <span id="bLoc"></span></div><div class="a" id="bAct"></div></div>
-   <div class="wc"><div class="n"><span id="cAv"></span>클린트 <span id="cLoc"></span></div><div class="a" id="cAct"></div></div>
+   <div class="wc"><div class="n"><span id="bAv"></span>버키 <span id="bLoc"></span></div><div class="a" id="bAct"></div><div class="wish" id="bWish"></div></div>
+   <div class="wc"><div class="n"><span id="cAv"></span>클린트 <span id="cLoc"></span></div><div class="a" id="cAct"></div><div class="wish" id="cWish"></div></div>
   </div>
   <div class="mis" id="misBox"></div>
   <div class="tools"><button class="act" id="btnNotes"><span class="ic">📝</span><span>냉장고 메모<small id="noteSub"></small></span></button><button class="act" id="btnRooms"><span class="ic">🚪</span><span>방 둘러보기<small>공간이 관계를 보여 줘요</small></span></button></div>
@@ -244,6 +247,7 @@ nav.tabs button.on{color:var(--amber)}
   <div class="set"><label>캐릭터 사진·SD 이미지</label><small>프로필 탭에서 넣고 바꿀 수 있어요.</small></div>
   <div class="set"><label>버키의 생일 <input type="text" id="sBdB" placeholder="MM-DD"></label><label style="margin-top:9px">클린트의 생일 <input type="text" id="sBdC" placeholder="MM-DD"></label><small>그날이 되면 특별한 일이 생겨요. 비워 두면 생기지 않아요.</small></div>
   <div class="set"><label>은신처에서 함께한 시간 <span id="sHours" style="color:var(--dim);font-size:12.5px"></span></label><small>이 게임에는 클리어도, 엔딩도 없어요. 두 사람은 계속 여기서 살아요.</small></div>
+  <div class="set"><label>세이브 옮기기</label><small>진행 상황을 글자 코드로 복사해서 다른 기기나 다른 버전(Claude ↔ GitHub)에 붙여 넣을 수 있어요. 사진·SD 그림·음악은 용량 때문에 코드에 들어가지 않아요.</small><div style="display:flex;gap:6px;margin-top:9px"><button class="mini" id="exBtn">세이브 내보내기</button><button class="mini" id="imBtn">세이브 불러오기</button></div></div>
   <div class="set"><label>처음부터 다시 <button class="btn warn" id="sReset">초기화</button></label><small id="sResetNote">모든 기록, 사진, 수집이 지워져요.</small></div>
   <div class="sync" id="syncNote"></div>
  </section>
@@ -422,6 +426,10 @@ function sched(hk){
    else if(C.c.ear>=7)c=P(c.loc,'보청기를 톡톡 두드리며 배터리를 확인하고 있다.','보청기 배터리를 확인했다.');
    else if(C.c.str>=5)c=P(c.loc,c.act.replace(/\.$/,'')+(hsh(hk)<.5?'. 평소보다 농담이 많다.':'. 평소와 달리 말이 없다.'),c.log);
    if(C.c.cough>0&&!c.sleep)c.act=c.act.replace(/\.$/,'')+'. 가끔 기침을 한다.'}}
+ if(S.bad&&hk>=S.bad.start&&hk<S.bad.start+24&&!S.bad.ended){const w=S.bad.w,o=OTH[w],B=BAD[w],P0={b,c};
+  if(!P0[w].sleep&&P0[w].loc!=='out')P0[w]=P(w==='b'?'window':P0[w].loc,B.actS,B.actS.replace('있다.','있었다.'));
+  if(st>=2&&!P0[o].sleep&&P0[o].loc!=='out')P0[o]=P(P0[w].loc==='window'?'chair':P0[w].loc,B.actP,B.actP);b=P0.b;c=P0.c}
+ if(S.bigFight&&hk>=S.bigFight.start){if(!b.sleep&&b.loc!=='out')b=P(b.loc,'클린트와 눈을 마주치지 않는다.','클린트와 눈을 마주치지 않았다.');if(!c.sleep&&c.loc!=='out')c=P(c.loc,'평소보다 농담이 많다. 아무도 웃지 않는다.','농담을 했다. 아무도 웃지 않았다.')}
  {const wn=weatherAt(hk),sl=slotOf(h);
   if(h>=8&&h<18&&h!==12&&h!==13){
    const WB={clear:['window','창문을 열어 환기하고 있다.'],rain:['window','창밖의 비를 한참 바라보고 있다.'],storm:['window','창문과 문단속을 다시 확인하고 있다.'],snow:['window','창밖에 쌓이는 눈을 바라보고 있다.'],fog:['window','평소보다 오래 창밖을 살피고 있다.']};
@@ -439,7 +447,7 @@ const HABITS={
  b_plum:['버키','자두를 좋아한다. 본인은 인정하지 않는다.'],b_smile:['버키','웃다가, 자기가 웃고 있다는 걸 깨닫고 표정을 가라앉힌다.'],
  b_remember:['버키','상대가 커피에 설탕을 몇 개 넣는지, 언제 잠드는지 전부 기억한다.'],b_insom:['버키','잠들지 못하는 밤엔 불 꺼진 거실을 서성인다.'],
  b_clock:['버키','누군가를 기다릴 때 시계를 자주 본다.'],b_quiet:['버키','상대가 아프면 평소보다 말수가 줄어든다.'],
- b_watch:['버키','클린트를 그냥, 오래 바라본다.'],b_dog:['버키','럭키에게만은 말이 많아진다. 낮은 목소리로, 아무도 없을 때.'],c_dog:['클린트','럭키와 똑같은 자세로 낮잠을 잔다.'],b_worry:['버키','클린트가 평소와 조금만 달라도 하루 종일 곁을 맴돈다.'],b_early:['버키','클린트보다 먼저 일어난다.'],
+ b_watch:['버키','클린트를 그냥, 오래 바라본다.'],b_asl:['버키','클린트가 보청기를 빼면, 말 대신 손으로 말한다.'],c_sorry:['클린트','정말 미안할 때는 농담을 하지 않는다.'],b_diary:['버키','일요일 밤마다 수첩에 한 주를 적는다. 짧게.'],b_dog:['버키','럭키에게만은 말이 많아진다. 낮은 목소리로, 아무도 없을 때.'],c_dog:['클린트','럭키와 똑같은 자세로 낮잠을 잔다.'],b_worry:['버키','클린트가 평소와 조금만 달라도 하루 종일 곁을 맴돈다.'],b_early:['버키','클린트보다 먼저 일어난다.'],
  c_late:['클린트','가끔, 아주 늦게까지 잔다.'],c_sugar:['클린트','커피에 설탕을 세 개 넣는다.'],c_nap:['클린트','소파에서 낮잠을 자다가 발을 떨어뜨린다.'],
  c_mono:['클린트','혼자인 줄 알면 혼잣말을 한다.'],c_hearing:['클린트','잘 때는 보청기를 빼서 머리맡에 둔다.'],c_hide:['클린트','다친 건 "별거 아니야"라며 숨긴다.'],
  c_thunder:['클린트','천둥이 치면 아주 잠깐, 굳는다.'],c_joke:['클린트','진지한 이야기는 농담으로 넘긴다.'],c_arm:['클린트','버키의 금속팔을 아무렇지 않게 만진다.'],
@@ -512,6 +520,10 @@ const POOL=[
  {id:'p_door',t:'알아',ty:'대화',st:[4,5],sl:['dusk','eve'],l:['클린트가 보급을 다녀와 문을 열자, 버키가 현관 바로 앞에 서 있었다.','"기다렸어."','예전 같으면 절대 하지 않았을 말이었다.','클린트가 웃었다. "알아."','버키는 클린트의 손에서 봉투를 받아 들고, 빈손으로 클린트의 손을 잡았다.']},
  {id:'p_gaze',t:'아침의 시선',ty:'일상',st:[4,5],sl:['dawn','morn'],hb:'b_early',l:['버키는 먼저 깼다. 늘 그렇듯이.','클린트는 아직 자고 있다. 입을 조금 벌리고, 베개를 반쯤 끌어안은 채.','버키는 일어나지 않았다. 그냥 보고 있었다.','삼십 분쯤 뒤, 클린트가 눈을 감은 채 말했다. "……보는 거 다 느껴져."','"그래서."','"계속 봐도 된다고."']},
  {id:'p_winter',t:'추워',ty:'스킨십',st:[4,5],c:x=>x.season==='겨울',sl:['dawn'],w:3,l:['버키가 먼저 일어나 창문을 열었다. 밖에는 눈이 내리고 있었다.','잠시 창밖을 바라보다가, 창문을 닫고 다시 침대로 돌아왔다.','클린트가 잠결에 뒤척이며 버키 쪽으로 몸을 돌렸다. "추워."','버키는 대답 대신 이불을 끌어 올려 주었다.','클린트가 눈도 뜨지 않은 채 버키의 손목을 붙잡았다. "어디 가?"','"아무 데도."','"그럼 여기 있어."','버키는 잠시 클린트를 내려다보다가 다시 누웠다. 그리고 그 손을 잡았다.']},
+ {id:'j_agent3',t:'나도 커버한다',ty:'갈등',st:[3,3],sl:['eve','dusk','night'],l:['클린트가 예전에 같이 임무를 뛰던 요원 이야기를 신나게 했다. "걔가 내 사각을 진짜 기가 막히게 커버했거든. 말 안 해도 알아서."','"……나도 커버한다."','말하고 나서야, 버키는 자기가 무슨 말을 했는지 깨달았다. 클린트가 눈을 끔뻑였다.','"어?"','"아무것도 아니다."','버키는 그날 저녁 내내 말이 없었다. 이미 손질한 칼을 한 번 더 손질하면서, 자기한테 그런 말을 할 자격이 있는지 생각했다.']},
+ {id:'j_steve3',t:'오래된 친구',ty:'장난',st:[3,3],sl:['eve','dusk','night'],l:['버키가 스티브 이야기를 했다. 비쩍 마른 꼬맹이가 골목마다 싸움을 걸고 다녔다는 이야기. 버키의 목소리가 평소보다 반 톤 높았다.','"와. 스티브 진짜 좋아하네."','"……오래된 친구다."','"알지, 알지. 나 같으면 질투 나겠다." 클린트가 웃으며 말했다. 농담이었다. 농담이어야 했다.','버키가 잠깐 클린트를 봤지만, 클린트는 이미 리모컨을 들고 채널을 돌리고 있었다.','그날 밤 클린트는 혼자 생각했다. 저 사람한테 내가 특별할 이유는 없는데. 그런데 왜 이렇게 신경이 쓰이지.']},
+ {id:'j_agent4',t:'……조금',ty:'스킨십',st:[4,5],sl:['eve','dusk','night'],l:['클린트가 또 그 요원 이야기를 했다. 같이 했던 임무, 같이 웃었던 일.','버키는 아무 말 없이 일어나더니, 클린트 바로 옆에 앉았다. 소파가 이렇게 넓은데. 그리고 클린트의 허리에 팔을 둘렀다.','클린트가 말을 멈추고 그 팔을 내려다봤다. "……질투해?"','"아니."','팔은 풀리지 않았다. 오히려 조금 더 단단해졌다.','한참 뒤, 버키가 아주 작게 덧붙였다. "……조금."','클린트는 그 요원 이야기를 그날 다시 꺼내지 않았다. 대신 버키 어깨에 머리를 기댔다.']},
+ {id:'j_steve4',t:'스티브야, 나야?',ty:'장난',st:[4,5],sl:['eve','dusk','night'],l:['버키가 오늘따라 스티브 이야기를 많이 했다. 세 번째 이야기가 끝나자, 클린트가 턱을 괴고 물었다.','"스티브야, 나야?"','장난스러운 말투였다. 버키는 클린트를 한참 봤다.','"……그게 질문이 되나."','"되지. 대답해."','"너."','클린트가 씩 웃었다. 버키가 덧붙였다. "스티브는 내가 언제 잠 못 드는지 몰랐다. 넌 알잖아."','클린트는 그 뒤로 한동안 아무 말도 못 했다. 장난으로 시작한 질문이었는데.']},
  // 계절·날씨
  {id:'s_spring',t:'창문을 연 날',ty:'특별',st:[0,5],c:x=>x.season==='봄'&&x.w==='clear',sl:['late','aft'],w:2,l:x=>['날이 풀렸다. 클린트가 은신처의 창문을 전부 열었다.','버키는 바람에 날리는 커튼을 보다가, 창가로 의자를 끌어다 앉았다.',x.st>=2?'"봄이네." "응. 봄이다." 그 말이 그날 대화의 전부였다.':'둘 다 아무 말 하지 않았지만, 그날 창문은 저녁까지 열려 있었다.']},
  {id:'s_summer',t:'선풍기 한 대',ty:'특별',st:[0,5],c:x=>x.season==='여름',sl:['aft','eve','night'],w:2,l:x=>['더웠다. 은신처에 선풍기는 한 대뿐이다.',x.st<2?'클린트가 선풍기를 자기 쪽으로 돌렸다. 버키가 말없이 다시 돌렸다. 그렇게 열두 번.':x.st<4?'결국 둘은 선풍기 앞에 나란히 앉았다. 회전 버튼을 누른 채로.':'"덥다고 좀 떨어지라며." "바람이 이쪽으로 와서." 버키는 클린트 옆에 꼭 붙어 앉았다. 선풍기 핑계로.','마지막엔 수박을 반으로 갈라 숟가락으로 퍼먹었다.']},
@@ -636,7 +648,7 @@ const grp3=st=>st<2?0:st<4?1:2;
 const hourMs=hk=>hk*H-KST;
 const walkAt=(w,ms)=>{const k=S.walk;return!!(k&&k.parts.includes(w)&&k.start<=ms&&ms<k.end)};
 const awayAt=(w,ms)=>{const m=S.mis&&S.mis[w];return!!(m&&m.start<=ms&&ms<m.end)||walkAt(w,ms)};
-function ensure(){ensureProf();S.cond=S.cond||condInit();S.memc=S.memc||{};S.fs=S.fs||{};S.notes=S.notes||[];S.itemInfo=S.itemInfo||{};S.firsts=S.firsts||{move_in:S.start};S.frev=S.frev||{};S.mis=S.mis||{b:null,c:null};S.inj=S.inj||{b:null,c:null};S.items=S.items||{};S.pendRet=S.pendRet||[];S.injF=S.injF||{};if(S.kit==null)S.kit=!!(S.props&&S.props.kit)}
+function ensure(){ensureProf();S.asl=S.asl||{l:{},last:null};S.diary=S.diary||[];(S.log||[]).forEach(e=>{if(!e.ty||e.ty==='undefined')e.ty='일상'});S.cond=S.cond||condInit();S.memc=S.memc||{};S.fs=S.fs||{};S.notes=S.notes||[];S.itemInfo=S.itemInfo||{};S.firsts=S.firsts||{move_in:S.start};S.frev=S.frev||{};S.mis=S.mis||{b:null,c:null};S.inj=S.inj||{b:null,c:null};S.items=S.items||{};S.pendRet=S.pendRet||[];S.injF=S.injF||{};if(S.kit==null)S.kit=!!(S.props&&S.props.kit)}
 function rollItems(dur){const md=MD[dur],got=[];const n=1+(Math.random()<(md.bp||0)?1:0);for(let i=0;i<n;i++){const un=ITEMS.filter(it=>!S.items[it[0]]&&!got.includes(it[0]));let id;if(un.length&&Math.random()<md.pn)id=un[Math.floor(Math.random()*un.length)][0];else id=ITEMS[Math.floor(Math.random()*ITEMS.length)][0];got.push(id)}return got}
 function rollInjury(dur){const md=MD[dur];if(Math.random()>=md.pi)return 0;let r=Math.random(),a=0;for(let i=0;i<3;i++){a+=md.sev[i];if(r<a)return i+1}return 1}
 function logAt(ms,ent){ent.h=Math.floor((ms+KST)/H);S.log.push(ent);if(!ent.f){S.seen[ent.id]=(S.seen[ent.id]||0)+1}}
@@ -955,6 +967,14 @@ const DOGEV=[
  {id:'d_guard',t:'문 앞의 럭키',sl:['deep'],l:['럭키가 침실 문 앞에 몸을 말고 잠들었다. 문을 지키듯이.','물을 마시러 나온 버키가 그걸 보고, 아주 조금 웃었다.']},
  {id:'d_snow',t:'첫 눈밭',c:x=>x.w==='snow',w:3,sl:['late','aft','dusk'],l:['럭키가 눈밭에서 미친 듯이 뛰어다녔다. 클린트도 같이 뛰었다.','버키는 현관에 서서 둘 다 감기 걸리겠다고 생각했다. 그리고 수건 두 장을 꺼내 왔다.']}
 ];
+const ABSTALK={b:[['버키가 고개를 들어 소파 쪽을 봤다. 비어 있다. 버키는 다시 하던 일로 돌아갔다.','버키는 대답 대신 현관 쪽을 한 번 봤다. 아직 아무도 오지 않았다.'],
+  ['"……클린트? 불렀—" 버키가 말을 멈췄다. 소파가 텅 비어 있었다. 아직 돌아오지 않았다.','버키가 무심코 커피를 두 잔 내렸다가, 한 잔을 도로 부었다.','버키가 시계를 봤다. 그리고 아까 시계를 본 지 십 분도 안 됐다는 걸 알았다.'],
+  ['"클린트, 너—" 버키가 돌아보다 멈칫했다. 텅 빈 소파. 버키는 잠깐 그대로 서 있다가, 시계를 봤다.','버키가 클린트의 후드티를 개다가, 한참 그걸 손에 들고 있었다.','"……늦네." 버키가 혼잣말을 했다. 아직 늦을 시간이 아니었다.']],
+ bd:['버키는 괜히 럭키를 한 번 더 쓰다듬었다. 럭키도 현관 쪽을 보고 있었다.','"……금방 온다." 버키가 럭키에게 말했다. 아니면 자기한테.'],
+ c:[['"반즈? ……아, 없지." 클린트가 혼잣말을 했다. 은신처가 유난히 조용하다.','클린트가 TV 볼륨을 올렸다. 조용한 게 싫었다.'],
+  ['"버키, 이거 봐—" 클린트가 고개를 돌리다 멈칫했다. 창가 자리가 비어 있었다. "……아, 맞다."','클린트가 버키가 늘 앉는 자리를 힐끔 봤다. 비어 있으니까 이상하게 넓어 보였다.','클린트가 문 쪽을 보고 귀를 기울였다. 발소리는 없었다.'],
+  ['"버키, 나 불렀—" 클린트가 말을 멈췄다. 아무도 없다. 클린트는 괜히 버키의 머그컵을 만지작거렸다.','클린트가 버키 베개를 끌어안고 소파에 누웠다. 아무도 안 보니까 괜찮다.','"빨리 와라…" 클린트가 천장을 보며 중얼거렸다.']],
+ cd:['클린트가 괜히 럭키를 한 번 더 쓰다듬었다. "버키 금방 온대." 럭키는 아무것도 묻지 않았는데.','"럭키, 버키 언제 와?" 럭키가 꼬리만 흔들었다. "……그치, 너도 모르지."']};
 const DOGTALK={b:['버키가 고개를 들었다. 발치에 엎드린 럭키도 같이 고개를 들었다. 둘이 똑같은 표정이었다.','"……럭키가 또 네 신발 물어 갔다고 클린트한테 전해라." 누구에게 하는 말인지 모를 부탁이었다.','버키는 대답 대신 럭키의 귀를 쓸었다. 럭키가 꼬리로 바닥을 탁탁 쳤다.','"럭키, 조용히." 버키가 말했다. 럭키는 처음부터 조용했다.'],
  b2:['"럭키가 클린트 자리에서 자고 있다. 깨우지 마." 버키는 아주 조금 웃고 있었다.'],
  c:['"럭키! 누가 왔나 봐!" 클린트가 말하자 럭키가 현관으로 달려갔다. 아무도 없었다. "……미안."','"럭키 귀엽지? 귀엽다고 해." 클린트가 허공에 대고 진지하게 말했다.','클린트가 럭키의 앞발을 잡고 흔들었다. "인사해, 럭키. 안녕~"','"쉿. 럭키 이제 막 잠들었어." 클린트가 속삭였다.'],
@@ -1001,6 +1021,73 @@ function walkLogSheet(k,full){
  $('okT').onclick=()=>{clearInterval(tlTimer);closeSheet()};
 }
 
+
+/* ═════════ 수어 ═════════ */
+const ASL=[
+ ['ok','괜찮아?',1,['클린트가 보청기를 빼고 소파에 누워 있었다. 버키가 뭔가 말하려다 멈췄다.','버키는 클린트가 예전에 손으로 대화하던 걸 떠올렸다. 어설프게 손을 움직였다. 틀린 동작이었다.','클린트가 눈을 끔뻑이다 웃음을 터뜨렸다. 그리고 버키의 손을 잡아 제대로 고쳐 줬다.','"괜찮아?" 그게 버키가 처음 배운 수어였다.'],'보청기를 뺀 클린트에게, 버키가 손으로 물었다. "괜찮아?" 클린트가 엄지를 들어 보였다.'],
+ ['water','물',1,['보청기 배터리가 떨어진 저녁. 클린트가 부엌을 가리키며 손짓을 했다.','버키는 한참 보다가, 물 한 잔을 가져왔다. 맞았다.','클린트가 그 손짓을 한 번 더 천천히 보여 줬다. 버키가 따라 했다. "물."'],'클린트가 손으로 "물"을 하자, 버키가 보지도 않고 물병을 던졌다. 클린트도 보지도 않고 받았다.'],
+ ['sleep','자',2,['밤늦게, 버키가 소파에서 졸고 있는 클린트 앞에 섰다. 보청기는 이미 탁자 위에 있었다.','버키가 지난주에 몰래 연습한 손짓을 했다. "자."','클린트가 졸린 눈으로 그걸 보다가 엄지를 들었다. 그리고 진짜로 침대로 갔다.'],'자정이 넘자 버키가 클린트 눈앞에서 손을 흔들고, 손으로 말했다. "자." 클린트는 버키가 아직 모르는 수어로 대답했다. 아마 "5분만"이었을 것이다.'],
+ ['eat','밥 먹자',2,['"밥 먹자." 버키가 말 대신 손으로 했다. 식탁 앞에서, 조금 쑥스러운 얼굴로.','클린트가 포크를 떨어뜨렸다. "……너 그거 언제 배웠어?"','"영상 봤다." 버키는 그렇게만 말했다. 클린트는 그날 저녁을 두 그릇 먹었다.'],'버키가 부엌 입구에서 손으로 "밥 먹자." 했다. 보청기를 빼고 있던 클린트가 벌떡 일어났다.'],
+ ['wait','기다릴게',3,['임무를 나가기 전, 클린트가 현관에서 보청기를 고쳐 끼우고 있었다.','버키가 아무 말 없이 손을 들었다. "기다릴게."','클린트는 그 자리에 한참 서 있었다. 대답하는 걸 잊어버린 사람처럼.'],'현관을 나서는 클린트 등 뒤로, 버키가 손으로 말했다. "기다릴게." 클린트가 돌아보지 않고 손을 흔들었다. 보고 있었다는 뜻이었다.'],
+ ['sorry','미안해',3,['말다툼 다음 날 아침. 버키는 말을 하지 않았다. 대신 클린트가 보는 앞에서 천천히 손을 움직였다.','"미안해."','클린트가 피식 웃었다. 그리고 자기도 똑같이 했다. 둘 다 동작이 조금 틀렸다. 상관없었다.'],'접시를 깬 클린트가 손으로 "미안해"를 하자, 버키는 고개를 젓고 빗자루를 들었다.'],
+ ['stay','여기 있어',3,['악몽에서 깬 버키가 거실로 나왔다. 보청기를 빼고 소파에서 자던 클린트가 기척에 눈을 떴다.','버키는 목소리가 나오지 않았다. 그래서 손으로 했다. "여기 있어."','클린트는 대답 대신 담요를 들어 옆자리를 내줬다.'],'잠결에 클린트가 손으로 "여기 있어."를 했다. 버키는 일어나려던 걸 그만두고 다시 누웠다.'],
+ ['love','사랑해',4,['보청기를 뺀 밤. 클린트가 버키의 가슴에 얼굴을 묻고 있었다.','버키가 클린트의 턱을 들어, 자기 손이 보이게 했다. 그리고 아주 천천히 손 모양을 만들었다.','"사랑해."','소리 없는 말이었다. 클린트는 한참 그 손을 보다가, 그 손에 입을 맞췄다.'],'아무 이유 없이, 버키가 저녁 식탁 너머로 손을 움직였다. 소리 없는 "사랑해." 클린트는 포크를 든 채로 웃었다.'],
+ ['home','집',4,['임무에서 돌아온 클린트를 버키가 현관에서 맞았다. 시끄러운 무전 때문에 클린트의 보청기는 꺼져 있었다.','버키가 손으로 말했다. "집에 왔다."','클린트가 웃으며 따라 했다. "집." 그게 둘의 "다녀왔어"가 됐다.'],'"집." 클린트가 현관에 들어서며 손으로 말했다. 버키가 똑같이 대답했다.'],
+ ['always','늘',5,['클린트가 장난처럼 손으로 물었다. "나 언제까지 좋아할 건데?"','버키는 대답 대신 손을 움직였다. 클린트가 가르쳐 준 적 없는 단어였다.','"늘."','"……그거 어디서 배웠어."','"네가 자는 동안 연습했다."'],'클린트가 자다 깨서 손으로 물었다. "아직 있어?" 버키가 대답했다. "늘."']
+];
+/* ═════════ 나쁜 날 ═════════ */
+const BAD={
+ b:{start:[['버키가 새벽 내내 거실을 서성였다. 아침이 되어도 눈이 붉었다.','클린트는 아무것도 묻지 않았다. 대신 커피를 평소보다 진하게 한 잔 더 내려 식탁에 두었다.'],['버키가 새벽에 세 번 깼다. 세 번 다, 클린트도 같이 깼다.','아침 식탁에서 버키는 한마디도 하지 않았다. 클린트도 오늘은 농담을 하지 않았다.','오늘은, 나쁜 날이다.']],
+  mid:x=>['버키가 창가에 서서 한 시간째 움직이지 않는다. 클린트가 옆에 섰다. 아무 말 없이.','버키가 컵을 떨어뜨렸다. 깨지는 소리에 버키의 몸이 굳었다. 클린트가 천천히, 보이는 쪽에서 다가가 파편을 치웠다. "괜찮아. 컵이야."','점심을 거의 먹지 않은 버키 앞에, 클린트가 자두 하나를 놓고 갔다. 한참 뒤 자두는 사라져 있었다.'].concat(x.st>=4?['버키가 소파에 누운 클린트 품으로 말없이 파고들었다. 클린트는 아무것도 묻지 않고 그 머리를 쓰다듬었다.']:[]).concat(S.dog&&S.dog.named?['럭키가 하루 종일 버키 곁을 떠나지 않았다. 버키가 움직이면 같이 움직였다.']:[]),
+  end:[['밤이 됐다. 버키는 여전히 말이 없었지만, 오늘은 거실 불을 끄지 않고 잤다. 클린트가 켜 둔 불이었다.'],['밤. 버키가 클린트의 손목을 잡았다. "……오늘, 고마웠다."','"뭘. 아무것도 안 했는데."','"그래서."','아무것도 묻지 않아 줘서. 그 말은 하지 않아도 전해졌다.']],
+  actS:'말이 거의 없다. 오늘은 혼자 있는 곳을 찾는다.',actP:'버키 곁을 지킨다. 아무것도 묻지 않는다.'},
+ c:{start:[['클린트의 보청기가 고장 났다. 아침부터 클린트는 평소보다 큰 목소리로 말했다. 자기 목소리도 잘 안 들리니까.','버키는 그걸 보다가, 종이와 펜을 클린트 앞에 내려놓았다.'],['클린트의 보청기가 고장 났다. 수리 부품은 내일에야 온다.','아침 식탁에서 클린트가 "괜찮아, 괜찮아"를 세 번 말했다. 하나도 안 괜찮아 보였다.','버키는 대답 대신 클린트의 어깨를 한 번 짚었다. 오늘은 나쁜 날이다.']],
+  mid:x=>['버키가 냉장고에 메모를 붙였다. "점심 12시. 같이." 클린트가 그 밑에 웃는 얼굴을 그렸다.','클린트가 뭔가를 말했는데 버키가 못 알아들었다. 버키는 같은 말을 세 번 하게 하지 않았다. 대신 클린트의 입 모양을 한참 봤다.','현관에서 누군가 문을 두드렸다. 클린트는 못 들었다. 버키가 클린트 어깨를 짚고 문 쪽을 가리켰다. 그냥 택배였다.','클린트가 TV 자막을 켰다. 버키는 아무 말 없이 같이 자막을 읽었다.'].concat(x.st>=4?['클린트가 소리 없는 세상이 싫다고 했다. 손으로. 버키는 클린트를 끌어안았다. 소리가 없어도 심장 뛰는 건 느껴지니까.']:[]).concat(S.dog&&S.dog.named?['럭키가 짖어도 클린트는 듣지 못했다. 대신 럭키는 클린트 손을 코로 쿡쿡 찔렀다. 똑똑한 개다.']:[]),
+  end:[['밤. 클린트가 버키에게 손짓으로 물었다. "오늘 나 짜증 났지?"','버키는 고개를 저었다. 그리고 종이에 적었다. "아니. 조용해서 좋았다."','거짓말이었지만, 다정한 거짓말이었다.'],['밤. 클린트가 버키에게 손으로 물었다. "오늘 나 짜증 났지?"','버키가 손으로 대답했다. 배운 지 얼마 안 된 수어로. "괜찮아."','클린트는 그 서툰 손동작을 오래 기억할 것 같았다.']],
+  actS:'보청기가 고장 나 아무 소리도 듣지 못한다. 평소보다 조용하다.',actP:'클린트 옆에 앉아 메모와 손짓으로 대화하고 있다.'}};
+/* ═════════ 큰 싸움 ═════════ */
+const BF={start:x=>['클린트가 또 다친 걸 숨겼다. 이번이 세 번째였다.','버키는 화를 내지 않았다. 그게 더 나빴다.','"이번이 세 번째다." 목소리는 조용했다. "다음엔 내가 모를 수도 있겠지."','클린트가 웃으며 뭔가 말하려 했지만, 버키는 이미 방을 나간 뒤였다.',x.st>=4?'그날 밤 버키는 침실이 아니라 거실 소파에서 잤다.':'그날 밤 거실 불은 일찍 꺼졌다.'],
+ mid:['버키가 순찰을 평소보다 두 배로 길게 돌았다. 은신처에 있는 시간을 줄이려는 것처럼.','클린트가 농담을 했다. 버키는 대답하지 않았다. 클린트는 농담을 한 번 더 했다. 아무도 웃지 않았다.','식탁에 앉은 둘 사이로, 예전처럼 빈 의자 네 개만큼의 거리가 생겼다.','클린트가 버키에게 커피를 내밀었다. 버키는 받았다. 고맙다는 말은 없었다.','"……화났어?" "아니." 둘 다 그게 거짓말인 걸 알았다.','클린트가 혼자 옥상에서 활을 쐈다. 오늘따라 과녁에 하나도 맞지 않았다.'],
+ end:x=>['저녁, 클린트가 소파에 앉은 버키 앞에 섰다. 장난기 없는 얼굴이었다.','"미안해."','버키가 고개를 들었다.','"농담 아니야. 핑계도 없어. 다쳤을 때 숨긴 거, 네가 걱정할까 봐 그랬는데… 그게 너한텐 더 무서웠다는 거 알아."','한참의 침묵. 클린트는 웃음으로 넘기지 않고, 그 침묵을 그대로 견뎠다.','"……다음엔 말해."','"응. 약속."',x.st>=4?'버키가 손을 뻗어 클린트를 끌어당겼다. 이마가 맞닿았다. "나도 미안하다. 말없이 나가 버려서."':'버키가 고개를 끄덕였다. 그리고 자기 옆자리를 손으로 두드렸다. 클린트가 앉았다. 빈 의자는 이제 없었다.']};
+/* ═════════ 작은 소원 ═════════ */
+const WISH={
+ pizza:{w:'c',act:'food',bub:'"피자 먹고 싶다…" 냉장고 문을 열었다 닫았다 한다.',done:x=>['식탁 위에 따끈한 음식이 차려져 있었다. 클린트가 소리를 질렀다. "누구야! 사랑해!"',x.st>=2?'"……내가 한 거 아니다." 버키는 그렇게 말하면서 제일 큰 조각을 클린트 접시에 옮겨 줬다.':'버키는 한 조각만 먹고 나머지는 클린트 쪽으로 밀었다.']},
+ music:{w:'c',act:'radio',bub:'조용한 게 싫은지 손가락으로 탁자를 두드리고 있다.',done:x=>['라디오에서 음악이 흘러나오자 클린트의 얼굴이 환해졌다.','클린트가 리듬에 맞춰 버키 어깨를 툭툭 쳤다. 버키는 그만하라고 하지 않았다.']},
+ cold:{w:'c',act:'blanket',bub:'소파에서 몸을 잔뜩 웅크리고 있다. 추워 보인다.',c:x=>x.season!=='여름',done:x=>['담요를 발견한 클린트가 그걸 망토처럼 두르고 버키 옆에 앉았다.','담요 반쪽은 자연스럽게 버키의 무릎 위로 넘어갔다.']},
+ coffee:{w:'b',act:'coffee',bub:'빈 원두 봉투를 한참 내려다보고 있다.',done:x=>['식탁 위의 커피 두 잔. 버키가 한 잔을 들고 창가로 가서, 아주 천천히 마셨다. 오랜만에 표정이 풀렸다.'].concat(x.st>=2?['남은 한 잔엔 버키가 설탕 세 개를 넣어 두었다.']:[])},
+ stove:{w:'b',act:'stove',bub:'난로 앞에서 비어 있는 장작 상자를 들여다보고 있다.',c:x=>x.season!=='여름',done:x=>['난로에 불이 붙자 버키가 그 앞에 자리를 잡았다.','클린트가 옆에 앉자, 버키는 말없이 자리를 조금 비켜 줬다.']},
+ book:{w:'b',act:'book',bub:'읽던 책을 찾는지 책장 앞을 서성이고 있다.',done:x=>['소파 위에서 읽던 책을 찾은 버키가 그 자리에 앉아 읽기 시작했다.','고맙다는 말 대신, 오늘은 책장 넘기는 소리가 유난히 가벼웠다.']}
+};
+function wishActive(){return S.wish&&Date.now()<S.wish.until}
+function fulfillWish(){const k=S.wish.id,x=ctxOf(nowHK()),lines=WISH[k].done(x);S.wish=null;S.log.push({h:nowHK(),id:'wish_'+k,t:'작은 소원',ty:'특별',l:lines,f:false});S.seen['wish_'+k]=(S.seen['wish_'+k]||0)+1;S.pts+=1;resp(lines);toast('작은 소원을 들어줬어요')}
+/* ═════════ 버키의 수첩 ═════════ */
+function diaryLine(e){const id=e.id||'';
+ if(id.startsWith('inj_c'))return'클린트가 다쳐서 돌아왔다. 내가 더 빨랐어야 했다.';
+ if(id.startsWith('inj_b'))return'다쳤다. 클린트가 화를 냈다. 화가 아니라는 건 안다.';
+ if(id==='jret')return'클린트와 같이 임무를 나갔다. 손발이 맞았다.';
+ if(id==='ret_c')return'클린트가 무사히 돌아왔다.';
+ if(id==='walk')return e.ty==='스킨십'?'셋이 걸었다. 클린트가 손을 잡았다. 놓지 않았다.':'럭키와 걸었다.';
+ if(id==='heal_c')return'클린트가 다 나았다. 오랜만에 잤다.';
+ if(id.startsWith('asl_')&&id!=='asl_use'){const a=ASL.find(q=>'asl_'+q[0]===id);return a?`수어를 하나 배웠다. "${a[1]}".`:null}
+ if(id.startsWith('bad_end'))return'나쁜 날이 있었다. 혼자가 아니었다.';
+ if(id==='bf_end')return'싸웠다. 그가 사과했다. 농담 없이. 나도 했다.';
+ if(id==='bf_start')return'화를 냈다. 소리는 지르지 않았다.';
+ if(id.startsWith('j_'))return'……별일 없었다.';
+ if(id==='p_plum'||id==='k_plum')return'자두.';
+ if(id==='m_dog')return'개가 생겼다.';
+ if(id==='m_dogname')return'개 이름은 럭키. 알파인이 나았다.';
+ if(id==='m_conf')return'기다렸다고 말했다.';
+ if(id==='m_name')return'처음으로 이름을 불렀다. 그도.';
+ if(id.startsWith('d_'))return'럭키가 또 뭔가를 물어 갔다.';
+ if(id.startsWith('wish_'))return WISH[id.slice(5)]&&WISH[id.slice(5)].w==='b'?'누가 내가 원하던 걸 가져다 놨다. 누군지는 모르겠다.':'클린트가 원하던 게 생겼다. 그가 웃었다.';
+ if(e.f)return null;
+ return{스킨십:'그가 가까이 있었다.',장난:'시끄러웠다. 나쁘지 않았다.',돌봄:'서로 챙겼다.',대화:'이야기를 오래 했다.',갈등:'말이 적은 날이 있었다.'}[e.ty]||null}
+function makeDiary(hk){const st=stage(),from=hk-168,seen=new Set(),out=[];
+ for(const e of S.log){if(e.h<=from||e.h>hk)continue;const l=diaryLine(e);if(!l||seen.has(l))continue;seen.add(l);out.push(`${WD[hkd(e.h).wd]}요일. ${l}`)}
+ const pickL=out.length>6?out.filter((_,i)=>i%Math.ceil(out.length/6)===0).slice(0,6):out;
+ const end=st<2?'특이사항 없음.':st<4?'클린트 — 설탕 3.':'그가 웃었다. 이번 주에도.';
+ return(pickL.length?pickL:['조용한 한 주.']).concat([end])}
+
 /* ═════════ 말 걸기 ═════════ */
 const TALK={
  b:[['버키가 고개를 든다. 주위를 한 번 둘러보고, 다시 하던 일로 돌아간다.','"……누구 있나." 대답이 없자, 버키는 문 쪽을 한참 응시했다.','버키의 손이 습관처럼 허리춤으로 갔다가 멈춘다. 아무것도 없다는 걸 확인하고 나서야.'],
@@ -1015,7 +1102,7 @@ const TALK={
 let nowHKsim=0;
 function ctxOf(hk){
  const t=hkd(hk),st=stage();
- return{hk,h:t.h,m:t.m,d:t.d,md:pad(t.m)+'-'+pad(t.d),slot:slotOf(t.h),season:seasonOf(t.m),w:weatherAt(hk),st,dayN:dayOf(hk)-dayOf(S.start)+1,cDay:S.coupleDay!=null?dayOf(hk)-S.coupleDay:-1};
+ return{hk,h:t.h,m:t.m,d:t.d,wd:t.wd,md:pad(t.m)+'-'+pad(t.d),slot:slotOf(t.h),season:seasonOf(t.m),w:weatherAt(hk),st,dayN:dayOf(hk)-dayOf(S.start)+1,cDay:S.coupleDay!=null?dayOf(hk)-S.coupleDay:-1};
 }
 function resolve(e,x){let l=typeof e.l==='function'?e.l(x):e.l;const n=names();return l.map(s=>s.replace(/\{B\}/g,n.B).replace(/\{C\}/g,n.C))}
 function unlock(x,e){
@@ -1031,6 +1118,7 @@ function runHour(hk){
  updCond(hk);
  let noPool=false;const hms=hourMs(hk)+60e3;
  const awB=awayAt('b',hms),awC=awayAt('c',hms);
+ if(S.bad&&hk>=S.bad.start+24)S.bad=null;
  if(!ev&&S.dog&&!S.dog.named){S.dog.named=true;ev={id:'m_dogname',t:'알파인, 아니면 럭키',ty:'특별'};lines=DOG_NAME(x)}
  if(!ev&&S.walk&&S.walk.start<=hms&&hms<S.walk.end){noPool=true;const j=S.walk.parts.length>1,w=S.walk.parts[0];if(Math.random()<.6){ev={id:'walkabs',t:j?'셋이 나간 오후':'산책 나간 사이',ty:'일상'};lines=j?['셋이 산책을 나가서 은신처가 조용하다. 럭키의 빈 방석 위로 햇빛만 들어온다.']:[w==='b'?'버키가 럭키를 데리고 산책을 나갔다. 클린트는 창가에서 둘이 멀어지는 걸 봤다.':'클린트가 럭키를 데리고 산책을 나갔다. 은신처가 갑자기 넓어진 것 같다. 버키는 책을 펼쳤다.']}}
  if(!ev&&(awB||awC)){noPool=true;
@@ -1042,6 +1130,22 @@ function runHour(hk){
    if(Math.random()<(w==='c'?.18:.32)){applyTreat(w,hms);ev={id:'streat_'+w,t:`${NM[w]}의 셀프 치료`,ty:'일상'};lines=STREAT[w];break}}}
  if(!ev&&!awB&&!awC){for(const w of['b','c']){const i=S.inj[w];if(!i)continue;if(i.sev>=2)noPool=true;
    if(!S.inj[OTH[w]]&&!['deep'].includes(x.slot)&&Math.random()<(i.sev>=2?.4:.3)){const a=BEH[w][x.st>=2?1:0];let k=Math.floor(Math.random()*a.length);if(k===S.lastBeh)k=(k+1)%a.length;S.lastBeh=k;ev={id:'beh_'+w,t:w==='b'?'다친 버키 곁에서':'다친 클린트 곁에서',ty:'돌봄'};lines=[a[k]];break}}}
+ if(!ev&&x.wd===0&&x.h===22&&!S.done['diary'+dayOf(hk)]){S.done['diary'+dayOf(hk)]=1;const L=makeDiary(hk);S.diary.push({h:hk,l:L});if(S.diary.length>40)S.diary.shift();ev={id:'diary',t:'버키의 수첩',ty:'특별'};lines=['일요일 밤, 버키가 수첩을 펼쳐 이번 주를 적었다.'].concat(L.map(q=>'— '+q));unlock(x,{hb:'b_diary'})}
+ if(!ev&&!awB&&!awC){
+  if(!S.bad&&x.h===7&&x.st>=1&&!S.inj.b&&!S.inj.c&&!S.bigFight&&Math.random()<.07){const w=Math.random()<.5?'b':'c';S.bad={w,start:hk,ended:false};ev={id:'bad_start_'+w,t:'나쁜 날',ty:'돌봄'};lines=BAD[w].start[x.st>=2?1:0]}
+  if(!ev&&S.bad){noPool=true;const B=BAD[S.bad.w];
+   if(!S.bad.ended&&x.h>=21){S.bad.ended=true;S.pts+=4;ev={id:'bad_end_'+S.bad.w,t:'같이 버틴 하루',ty:'돌봄'};lines=S.bad.w==='c'&&Object.keys(S.asl.l).length?B.end[1]:B.end[S.bad.w==='b'&&x.st>=2?1:0]}
+   else if(!S.bad.ended&&DAY.includes(x.slot)&&Math.random()<.45){const a=B.mid(x);let k=Math.floor(Math.random()*a.length);if(k===S.lastBad)k=(k+1)%a.length;S.lastBad=k;ev={id:'bad_mid',t:'나쁜 날',ty:'돌봄'};lines=[a[k]]}}
+  if(!ev&&!S.bigFight&&!S.bad&&x.st>=3&&['eve','dusk'].includes(x.slot)&&(S.lastBF==null||hk-S.lastBF>240)&&Math.random()<.03){S.bigFight={start:hk};S.lastBF=hk;ev={id:'bf_start',t:'세 번째',ty:'갈등'};lines=BF.start(x)}
+  if(!ev&&S.bigFight){noPool=true;const d=hk-S.bigFight.start;
+   if(d>=44&&['dusk','eve','night'].includes(x.slot)){S.bigFight=null;S.pts+=6;ev={id:'bf_end',t:'농담 없이',ty:'대화'};lines=BF.end(x);unlock(x,{hb:'c_sorry'})}
+   else if(d>=1&&x.slot!=='deep'&&Math.random()<.35){let k=Math.floor(Math.random()*BF.mid.length);if(k===S.lastBFm)k=(k+1)%BF.mid.length;S.lastBFm=k;ev={id:'bf_mid',t:'거리',ty:'갈등'};lines=[BF.mid[k]]}}
+  if(!ev){const deaf=S.bad&&S.bad.w==='c'&&!S.bad.ended,quiet=x.slot==='night'||(x.slot==='deep'&&x.h<2)||S.cond.c.ear>=7||deaf;
+   const nx=ASL.find(a=>!S.asl.l[a[0]]);
+   if(quiet&&nx&&x.st>=nx[2]&&(S.asl.last==null||hk-S.asl.last>=30)&&Math.random()<(deaf?.6:.2)){S.asl.l[nx[0]]=hk;S.asl.last=hk;ev={id:'asl_'+nx[0],t:`수어: ${nx[1]}`,ty:'스킨십'};lines=nx[3];if(Object.keys(S.asl.l).length>=3)unlock(x,{hb:'b_asl'})}
+   else if(quiet&&Object.keys(S.asl.l).length&&Math.random()<.07){const ks=Object.keys(S.asl.l),kk=ks[Math.floor(Math.random()*ks.length)],a=ASL.find(q=>q[0]===kk);ev={id:'asl_use',t:'소리 없는 말',ty:'스킨십'};lines=[a[4]]}}
+  if(!ev&&!S.wish&&!S.bad&&!S.bigFight&&x.h>=9&&x.h<=21&&Math.random()<.08){const ks=Object.keys(WISH).filter(k=>!WISH[k].c||WISH[k].c(x));const k=ks[Math.floor(Math.random()*ks.length)];S.wish={id:k,until:hms+4*H}}
+ }
  if(!ev&&!awB&&!awC&&S.loveNote&&!S.lovePin&&hk-S.loveNote>=72&&DAY.includes(x.slot)){S.lovePin=1;const n=S.notes.find(n=>n.love);if(n)n.pin=true;ev={id:'lovepin',t:'버리지 않은 메모',ty:'특별'};lines=['클린트가 냉장고 문을 열다가 멈췄다. 사흘 전 자기가 붙인 메모가 그대로 있었다. 파스타는 진작 먹었는데.','"이거 왜 안 버려?"','"……아직 유효해서."','클린트는 그날 하루 종일 웃고 다녔다.'];unlock(x,{hb:'b_note'})}
  if(!ev&&!awB&&!awC&&!noPool&&Math.random()<.45){const cand=CARE.filter(e=>x.st>=e.st&&e.c(x)&&!(S.inj[e.who==='b'?'c':'b'])&&!S.recent.includes(e.id));
   if(cand.length){const e=cand[Math.floor(Math.random()*cand.length)];ev={id:e.id,t:{cr_batt:'보청기 배터리',cr_stove:'장작 두 개',cr_bow:'정리된 화살',cr_water:'물 한 잔',cr_cover:'덮어 둔 아침',cr_armkit:'관리 도구',cr_insom:'잠 못 드는 밤',cr_tired:'오늘은 내가',cr_strb:'창가의 커피',cr_strc:'농담이 많은 날'}[e.id],ty:'돌봄'};lines=e.l(x);if(e.fx)e.fx(x);S.memc[e.mem]=(S.memc[e.mem]||0)+1;if(S.memc[e.mem]>=e.need)unlock(x,{hb:e.hb})}}
@@ -1049,7 +1153,7 @@ function runHour(hk){
   if(cand.length){mk(cand[0])}}
  if(!ev&&!S.dog&&x.st>=3&&!awB&&!awC&&!S.inj.c&&!S.clintOut&&['aft','dusk'].includes(x.slot)&&Math.random()<.3){S.dog={since:hk,food:hms+12*H,named:false};S.ms.m_dog=hk;ev={id:'m_dog',t:'ARROW',ty:'특별'};lines=DOG_ARRIVE(x)}
  if(!ev&&S.dog&&S.dog.named&&dogHome(hms)&&!awB&&!awC&&S.dog.food<hms&&!['deep'].includes(x.slot)&&Math.random()<.55){const w=Math.random()<.6?'b':'c';S.dog.food=hms+12*H;ev={id:'d_feed',t:'빈 밥그릇',ty:'돌봄'};lines=w==='b'?['럭키가 빈 밥그릇을 코로 밀며 버키를 쳐다봤다.','버키는 아무 말 없이 사료를 가득 채웠다. "……천천히 먹어."']:['럭키가 밥그릇을 물고 와 클린트 앞에 내려놓았다.','"아, 미안미안! 깜빡했다!" 클린트가 사료를 두 그릇 분량으로 부었다. 지나가던 버키가 반을 덜어냈다.']}
- if(!ev&&S.dog&&S.dog.named&&dogHome(hms)&&!awB&&!awC&&!noPool&&Math.random()<.25){const cand=DOGEV.filter(e=>(!e.sl||e.sl.includes(x.slot))&&(!e.c||e.c(x))&&(!e.st||x.st>=e.st)&&!S.recent.includes(e.id));if(cand.length)mk(wpick(cand))}
+ if(!ev&&S.dog&&S.dog.named&&dogHome(hms)&&!awB&&!awC&&!noPool&&Math.random()<.25){const cand=DOGEV.filter(e=>(!e.sl||e.sl.includes(x.slot))&&(!e.c||e.c(x))&&(!e.st||x.st>=e.st)&&!S.recent.includes(e.id));if(cand.length)mk(Object.assign({ty:'일상'},wpick(cand)))}
  if(!ev&&!(awB||awC))for(const m of MILESTONES){if(!S.ms[m.id]&&x.st>=m.st&&(!m.minPts||S.pts>=m.minPts)&&m.sl.includes(x.slot)&&!(m.id==='m_late'&&S.couple!=null)){S.ms[m.id]=hk;mk(m);break}}
  if(!ev)for(const sp of SPECIAL){const key=sp.id+':'+(x.m===1&&sp.id==='ny'?hkd(hk).y:hkd(hk).y);if(!S.done[key]&&sp.c(x)){S.done[key]=hk;mk(sp,'특별');break}}
  if(!ev&&x.h===20){for(const[k,n]of FIRSTS){const f=S.firsts[k];if(f==null||k==='couple')continue;const dd=dayOf(hk)-dayOf(f);if(dd>0&&dd%365===0&&!S.done['an_'+k+dd]){S.done['an_'+k+dd]=1;ev={id:'an_'+k,t:`${dd/365}년 전 오늘`,ty:'특별'};lines=[`${dd/365}년 전 오늘은 「${n}」이었다.`,x.st>=4?'둘 중 누구도 날짜를 말하지 않았다. 그런데 저녁 식탁엔 평소보다 반찬이 하나 더 있었고, 클린트는 이유를 묻지 않았다.':'아무도 그 날짜를 기억하지 못하는 것 같았다. 버키의 수첩에 적힌 동그라미 하나를 빼면.'];break}}}
@@ -1058,7 +1162,7 @@ function runHour(hk){
   if(stp===0&&['morn','late','lunch'].includes(x.slot))pool='morn';else if(stp===1&&['lunch','aft'].includes(x.slot))pool='mid';else if(stp===2&&['dusk','eve'].includes(x.slot))pool='eve';
   if(pool){const a=AFTER[pool];const e=a[Math.floor(Math.random()*a.length)];S.privAfter=stp+1;ev={id:'after_'+pool,t:e.t,ty:pool==='morn'?'심야':'돌봄'};lines=e.l;unlock(x,{hb:pool==='mid'?'b_worry':null})}}
  if(!ev&&S.fight&&hk-S.fight>=6&&['morn','late','lunch'].includes(x.slot)){S.fight=0;ev={id:'makeup',t:'아무 일 없었다는 듯',ty:'일상'};lines=FIGHT_AFTER(x)}
- if(!ev&&!(awB||awC)){for(const k in PROPEV){const p=S.props[k];if(p&&hk-p<=14&&hk>=p&&PROPEV[k].sl.includes(x.slot)){const e=PROPEV[k];delete S.props[k];mk({id:'prop_'+k,t:e.t,ty:e.ty,l:e.l,gf:e.gf});break}else if(p&&hk-p>14)delete S.props[k]}}
+ if(!ev&&!(awB||awC)&&!S.bigFight){for(const k in PROPEV){const p=S.props[k];if(p&&hk-p<=14&&hk>=p&&PROPEV[k].sl.includes(x.slot)){const e=PROPEV[k];delete S.props[k];mk({id:'prop_'+k,t:e.t,ty:e.ty,l:e.l,gf:e.gf});break}else if(p&&hk-p>14)delete S.props[k]}}
  if(!ev&&!noPool&&x.st>=4&&S.set.priv&&(x.slot==='night'||(x.slot==='deep'&&x.h<2))&&(S.privDay==null||dayOf(hk+2)-S.privDay>=2)&&Math.random()<.14){
   const c=PRIV.filter(p=>!p.c||p.c(x));const e=c[Math.floor(Math.random()*c.length)];S.privDay=dayOf(hk+2);S.privAfter=0;mk(e,'심야')}
  if(!ev){
@@ -1213,6 +1317,7 @@ function renderHome(){
  $('wsrc').innerHTML=real?'Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a>':'';
  $('bLoc').textContent='· '+LOCN[sn.b.loc];$('cLoc').textContent='· '+LOCN[sn.c.loc];
  $('bAct').textContent=sn.b.act;$('cAct').textContent=sn.c.act;
+ {const wa=wishActive(),W=wa?WISH[S.wish.id]:null;$('bWish').textContent=wa&&W.w==='b'&&sn.b.loc!=='out'&&!sn.b.sleep?'💭 '+W.bub:'';$('cWish').textContent=wa&&W.w==='c'&&sn.c.loc!=='out'&&!sn.c.sleep?'💭 '+W.bub:''}
  $('bAv').innerHTML=AV.b?`<img class="avs${AV.pb?' pix':''}" style="border-color:var(--blue)" src="${AV.b}">`:'<i style="background:var(--blue)"></i>';
  $('cAv').innerHTML=AV.c?`<img class="avs${AV.pc?' pix':''}" style="border-color:var(--plum)" src="${AV.c}">`:'<i style="background:var(--plum)"></i>';
  const cur=[...S.log].reverse().find(e=>e.h===hk)||S.log[S.log.length-1];
@@ -1250,7 +1355,8 @@ function acts(){
 }
 function renderActs(){
  const box=$('acts');box.innerHTML='';
- for(const a of acts()){const b=document.createElement('button');b.className='act';b.disabled=!!a.dis;b.innerHTML=`<span class="ic">${a.ic}</span><span>${esc(a.l)}${a.sub?`<small>${esc(a.sub)}</small>`:''}</span>`;b.onclick=()=>doAct(a.id);box.appendChild(b)}
+ const wishAct=wishActive()?WISH[S.wish.id].act:null;
+ for(const a of acts()){const b=document.createElement('button');b.className='act'+((a.id===wishAct||(wishAct==='book'&&a.id==='move'))?' hl':'');b.disabled=!!a.dis;b.innerHTML=`<span class="ic">${a.ic}</span><span>${esc(a.l)}${a.sub?`<small>${esc(a.sub)}</small>`:''}</span>`;b.onclick=()=>doAct(a.id);box.appendChild(b)}
 }
 function resp(t){const r=$('resp');r.innerHTML=linesHTML([].concat(t));r.classList.remove('on');void r.offsetWidth;r.classList.add('on')}
 function doAct(id){
@@ -1264,13 +1370,14 @@ function doAct(id){
  if(id==='window'){if(p.window){delete p.window;resp('창문을 닫았다.')}else setP('window','창문을 열었다. 바깥 공기가 들어온다.')}
  if(id==='radio'){let i=(RADIO.indexOf(p.radioCh||'')+1)%RADIO.length;p.radioCh=RADIO[i];if(p.radioCh){p.radio=hk;addBonus()}else delete p.radio;resp(p.radioCh?`라디오를 ${RADION[p.radioCh]} 채널로 맞췄다.`:'라디오를 껐다.');userPaused=false;playChannel(p.radioCh)}
  if(id==='move'){sheet(`<h2>물건 옮기기</h2><div class="sub">어떤 걸 어디로 옮길까요?</div><div class="opts"><button class="btn" data-m="book">버키의 책을 소파 위로</button><button class="btn" data-m="bow">클린트의 활을 식탁 위로</button><button class="btn" data-m="x">그만두기</button></div>`);
-  document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const m=b.dataset.m;closeSheet();if(m==='x')return;p[m]=hk;addBonus();resp(m==='book'?'안락의자 위의 책을 소파 위로 옮겨 두었다.':'벽에 걸린 활을 식탁 위로 옮겨 두었다.');save();renderHome()});return}
+  document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const m=b.dataset.m;closeSheet();if(m==='x')return;p[m]=hk;addBonus();resp(m==='book'?'안락의자 위의 책을 소파 위로 옮겨 두었다.':'벽에 걸린 활을 식탁 위로 옮겨 두었다.');if(m==='book'&&wishActive()&&S.wish.id==='book')fulfillWish();save();renderHome()});return}
  if(id==='talkB'||id==='talkC'){const who=id==='talkB'?'b':'c',me=s[who];const g=st<2?0:st<4?1:2;
   if(me.loc==='out')resp(who==='b'?'버키는 은신처에 없다. 바깥 어딘가를 돌고 있다.':'클린트는 은신처에 없다.');
   else if(me.sleep)resp(who==='b'?'버키는 자고 있다. 아주 잠깐 미간이 찌푸려졌다가, 다시 풀린다.':'클린트는 자고 있다. 보청기를 뺀 채라 아무것도 듣지 못한다.');
-  else{let a=TALK[who][g];if(S.dog&&S.dog.named&&dogHome(Date.now())&&Math.random()<.35)a=DOGTALK[who].concat(g>=2?DOGTALK[who+'2']:[]);let line=a[Math.floor(Math.random()*a.length)];if(g===0)line=line.replace('반즈',names().B);resp(line)}
+  else{let a=TALK[who][g];const ow=OTH[who];if(awayAt(ow,Date.now())){a=ABSTALK[who][g].slice();if(S.dog&&S.dog.named&&dogHome(Date.now()))a=a.concat(ABSTALK[who+'d'])}else {}if(S.dog&&S.dog.named&&dogHome(Date.now())&&!awayAt(ow,Date.now())&&Math.random()<.35)a=DOGTALK[who].concat(g>=2?DOGTALK[who+'2']:[]);let line=a[Math.floor(Math.random()*a.length)];if(g===0)line=line.replace('반즈',names().B);resp(line)}
   return}
  if(id==='dogfood'){S.dog.food=Date.now()+12*H;addBonus();resp('럭키 밥그릇에 사료를 가득 채웠다. 럭키가 꼬리를 프로펠러처럼 돌렸다.')}
+ if(wishActive()&&WISH[S.wish.id].act===id&&(id!=='radio'||p.radioCh))fulfillWish();
  if(id==='photo'){const sn=snap();const cur=[...S.log].reverse().find(e=>e.h===hk);
   const t0=hkd(hk);let desc=`${t0.m}월 ${t0.d}일 ${pad(sn.h)}:${pad(sn.mi)} · ${WN[sn.w]} · ${sn.season}\n버키는 ${LOCN[sn.b.loc]}에서 ${sn.b.act}\n클린트는 ${LOCN[sn.c.loc]}에서 ${sn.c.act}`;
   if(cur&&!cur.f&&cur.l)desc+='\n\n'+cur.l.join(' ');
@@ -1418,7 +1525,7 @@ function renderLog(){
 /* 수집 */
 let colTab='hb';
 function renderCol(){
- const F=[['hb','습관'],['it','물품'],['an','기념일'],['mo','함께한 순간'],['gf','선물'],['sp','특별한 날']];$('colF').innerHTML='';
+ const F=[['hb','습관'],['it','물품'],['an','기념일'],['sl','수어'],['dy','수첩'],['mo','함께한 순간'],['gf','선물'],['sp','특별한 날']];$('colF').innerHTML='';
  F.forEach(([k,n])=>{const b=document.createElement('button');b.className='chip'+(colTab===k?' on':'');b.textContent=n;b.onclick=()=>{colTab=k;renderCol()};$('colF').appendChild(b)});
  const B=$('colBody');B.innerHTML='';
  const card=(h,p,lock)=>{const d=document.createElement('div');d.className='card'+(lock?' lock':'');d.innerHTML=`<h4>${esc(h)}</h4>${p?`<p>${esc(p)}</p>`:''}`;B.appendChild(d)};
@@ -1431,6 +1538,10 @@ function renderCol(){
  if(colTab==='mo'){const all=POOL.concat(MILESTONES,[CONF],CALLBACK,CARE.map(e=>({id:e.id,t:{cr_batt:'보청기 배터리',cr_stove:'장작 두 개',cr_bow:'정리된 화살',cr_water:'물 한 잔',cr_cover:'덮어 둔 아침',cr_armkit:'관리 도구',cr_insom:'잠 못 드는 밤',cr_tired:'오늘은 내가',cr_strb:'창가의 커피',cr_strc:'농담이 많은 날'}[e.id],ty:'돌봄'})));const seen=all.filter(e=>S.seen[e.id]);prog(`${seen.length} / ${all.length} · 새로운 순간은 관계가 변하면서 계속 열려요`);
   all.forEach(e=>S.seen[e.id]?card(e.t,(e.ty)+' · '+S.seen[e.id]+'번 봄'):card('???','',1))}
  if(colTab==='gf'){const ks=Object.keys(GIFTS);prog(`${ks.filter(k=>S.gifts[k]).length} / ${ks.length} · 눌러서 살펴볼 수 있어요`);ks.forEach(k=>{const[a,b]=GIFTS[k].split(' — ');if(S.gifts[k]){card(a,b);const el=B.lastChild;el.style.cursor='pointer';el.onclick=()=>itemSheet(k)}else card('???','',1)})}
+ if(colTab==='sl'){const n=Object.keys(S.asl.l).length;prog(`${n} / ${ASL.length} · 버키가 클린트에게서 배운 수어. 보청기를 뺀 밤이나 나쁜 날에 조금씩 늘어요.`);
+  ASL.forEach(a=>{const h=S.asl.l[a[0]];if(h){const t=hkd(h);card(`"${a[1]}"`,`${t.m}월 ${t.d}일에 배움 · ${a[4]}`)}else card('???','아직 배우지 않았다.',1)})}
+ if(colTab==='dy'){prog('일요일 밤마다 버키가 수첩에 한 주를 적어요.');if(!S.diary.length)prog('아직 적힌 장이 없어요.');
+  S.diary.slice().reverse().forEach(d=>{const t=hkd(d.h);const el=document.createElement('div');el.className='card';el.innerHTML=`<h4>${t.m}월 ${t.d}일 (일)</h4><p class="pre"></p>`;el.querySelector('p').textContent=d.l.join('\n');B.appendChild(el)})}
  if(colTab==='an'){prog('두 사람의 처음들. 몇몇은 기록을 펼쳐 봐야 발견돼요.');const today=dayOf(nowHK());
   FIRSTS.forEach(([k,n,hid])=>{const f=S.firsts[k];if(f==null){card('???','아직 오지 않은 날',1);return}
    if(hid&&!S.frev[k]){card('???','이미 지나간 날이에요. 일상 기록 어딘가에 남아 있어요.',1);return}
@@ -1486,6 +1597,17 @@ function renderAvBox(){
   if(bts[1])bts[1].onclick=()=>{AV[k]=null;saveAV();renderAvBox()};
   box.appendChild(r)});
 }
+async function exportCode(){const o=JSON.parse(JSON.stringify(S));o.log=o.log.slice(-150);o.log.forEach((e,i)=>{if(i<o.log.length-40)e.l=null});delete o.rwh;delete o.pendRet;const j=JSON.stringify(o);
+ if(window.CompressionStream){try{const cs=new Blob([j]).stream().pipeThrough(new CompressionStream('gzip'));const buf=new Uint8Array(await new Response(cs).arrayBuffer());let bin='';for(let i=0;i<buf.length;i+=8192)bin+=String.fromCharCode.apply(null,buf.subarray(i,i+8192));return'GNS2:'+btoa(bin)}catch(e){}}
+ return'GNS1:'+btoa(unescape(encodeURIComponent(j)))}
+async function importCode(v){if(v.startsWith('GNS2:')){const bin=atob(v.slice(5)),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);const ds=new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'));return JSON.parse(await new Response(ds).text())}
+ if(v.startsWith('GNS1:'))return JSON.parse(decodeURIComponent(escape(atob(v.slice(5)))));throw 0}
+$('exBtn').onclick=async()=>{const code=await exportCode();sheet(`<h2>세이브 내보내기</h2><div class="sub">아래 코드를 전부 복사해서, 다른 기기나 다른 버전의 "세이브 불러오기"에 붙여 넣으세요. 글자 수: ${code.length.toLocaleString()}</div><textarea class="code" id="exT" readonly></textarea><div class="opts" style="margin-top:10px"><button class="btn" id="exC" style="color:var(--amber)">복사하기</button><button class="btn" id="exX">닫기</button></div>`);
+ $('exT').value=code;$('exX').onclick=closeSheet;$('exC').onclick=async()=>{try{await navigator.clipboard.writeText(code);toast('복사했어요')}catch(e){const t=$('exT');t.focus();t.select();toast('자동 복사가 안 돼요. 길게 눌러 전체 선택 후 복사해 주세요')}}};
+$('imBtn').onclick=()=>{sheet(`<h2>세이브 불러오기</h2><div class="sub">내보낸 코드를 붙여 넣으세요. 지금 이 기기의 진행 상황은 덮어써져요.</div><textarea class="code" id="imT" placeholder="GNS2:..."></textarea><div class="opts" style="margin-top:10px"><button class="btn" id="imOk" style="color:var(--amber)">불러오기</button><button class="btn" id="imX">취소</button></div>`);
+ $('imX').onclick=closeSheet;$('imOk').onclick=async()=>{const v=$('imT').value.replace(/\s+/g,'');try{const o=await importCode(v);if(!o||!o.created||!o.log)throw 0;
+  const b=$('imOk');if(!b.dataset.c){b.dataset.c=1;b.textContent='정말 덮어쓸까요? 한 번 더 누르세요';return}
+  S=o;S.savedAt=Date.now();ensure();save();closeSheet();const ev=catchUp();renderAll();toast('세이브를 불러왔어요');showView('home');if(ev.length>=2)setTimeout(()=>offlineSheet(ev),300)}catch(e){toast('코드가 올바르지 않아요')}}};
 $('sPriv').onchange=e=>{S.set.priv=e.target.checked;save()};
 const bdOK=v=>v===''||/^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(v);
 $('sBdB').onchange=e=>{const v=e.target.value.trim();if(bdOK(v)){S.bd.b=v;save();toast('저장했어요')}else{toast('MM-DD 형식으로 적어 주세요 (예: 03-10)');e.target.value=S.bd.b}};
