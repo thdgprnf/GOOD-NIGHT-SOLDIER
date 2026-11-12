@@ -850,7 +850,12 @@ const THINK={
  b:['바튼. 활을 쓴다. 실력은 확실하다. 등을 맡기기엔, 아직 모르겠다.','시끄럽다. 그런데 기차 소리가 날 때마다 TV 볼륨이 올라간다. 우연은 아닌 것 같다.','클린트. 커피에 설탕 세 개. 늦게 자고, 생각보다 일찍 일어난다. ……이런 걸 왜 다 알고 있는지는 모르겠다.','그가 늦으면 시계를 보게 된다. 그 이유는 생각하지 않으려고 한다.','내가 이런 걸 가져도 되는지, 아직도 모르겠다. 그래도 그가 잡은 손을 먼저 놓고 싶지는 않다.','아침에 먼저 깨면, 그냥 본다. 그게 하루 중 제일 조용한 시간이다.'],
  c:['반즈. "윈터 솔져"라고 부르면 안 된다. 그건 확실히 배웠다. 나머지는 아직 모름.','말이 없다. 근데 내가 보청기를 빼면 탁자를 두드려 준다. 그런 사람이 나쁜 사람일 리가.','버키. 같이 있으면 조용해도 안 어색한 사람. 그런 사람, 별로 없는데.','나 혼자 착각하는 건가? ……아니, 착각 아니라고 했지. 어느 쪽 착각인지는 말 안 해 줬지만.','"기다렸어"라는 말을 이렇게 좋아하게 될 줄은 몰랐다.','이제 칫솔이 두 개인 게 당연하다. 그게 제일 좋다.']
 };
-function thinkOf(w){const st=stage(),o=OTH[w],L=[THINK[w][st]];
+function thinkOf(w){const st=stage(),o=OTH[w],hk=nowHK();let base=THINK[w][st];
+ if(S.bigFight)base=w==='b'?(st>=4?'화가 난 게 아니다. 그를 다시 그렇게 발견할까 봐 무서운 거다. 그 말을 아직 못 했다.':'그가 다친 걸 또 숨겼다. 화가 나는 건지 무서운 건지 모르겠다. 아마 둘 다.'):(st>=4?'걔 화난 거 아니야. 무서웠던 거지. 알면서 또 숨긴 내가 제일 별로다.':'이번엔 진짜 화났나 보다. 농담으로 넘어갈 수 있는 거였으면 좋겠는데, 아닌 것 같다.');
+ else if(S.fight)base=w==='b'?'말이 지나쳤다. 그래도 문은 잠가야 한다.':'내일 아침이면 괜찮아지겠지. ……괜찮아지겠지?';
+ const L=[base];
+ if(!S.bigFight&&S.bfEnd&&hk-S.bfEnd<72)L.push(w==='b'?'그가 사과했다. 농담 없이. 그게 생각보다 오래 남는다.':'농담 없이 사과한 건 처음이었다. 다음엔 진짜 말할 거다. 다쳤으면.');
+ if(S.bad&&!S.bad.ended&&hk<S.bad.start+24){if(S.bad.w===w)L.push(w==='b'?'오늘은 아무것도 묻지 않는 그가 고맙다.':'아무것도 안 들리는데, 버키가 옆에 있는 건 느껴진다. 그걸로 버티는 중.');else L.push(w==='b'?'오늘 그는 아무것도 듣지 못한다. 그래서 손으로 말한다. 서툴러도.':'오늘 버키는 말이 없다. 괜찮아. 아무것도 안 물어볼 거야. 옆에만 있을 거야.')}
  if(S.inj&&S.inj[o])L.push(w==='b'?'지금은 그가 다친 게 내 탓 같다. 그 생각을 멈출 수가 없다.':'다치지 말라고 몇 번을 말해. 화가 나는데, 사실은 무서운 거다.');
  else if(S.mis&&S.mis[o]&&!(S.mis[w]))L.push(w==='b'?'지금은 그가 없다. 시계를 몇 번 봤는지는 세지 않기로 했다.':'버키 없으니까 집이 너무 조용함. 빨리 와.');
  if(S.cond&&S.cond[o]&&S.cond[o].fat>=6)L.push(w==='b'?'오늘 그는 피곤해 보인다. 저녁은 내가 해야겠다.':'버키가 오늘 같은 페이지만 보고 있다. 좀 자라고 할까.');
@@ -967,6 +972,22 @@ const DOGEV=[
  {id:'d_guard',t:'문 앞의 럭키',sl:['deep'],l:['럭키가 침실 문 앞에 몸을 말고 잠들었다. 문을 지키듯이.','물을 마시러 나온 버키가 그걸 보고, 아주 조금 웃었다.']},
  {id:'d_snow',t:'첫 눈밭',c:x=>x.w==='snow',w:3,sl:['late','aft','dusk'],l:['럭키가 눈밭에서 미친 듯이 뛰어다녔다. 클린트도 같이 뛰었다.','버키는 현관에 서서 둘 다 감기 걸리겠다고 생각했다. 그리고 수건 두 장을 꺼내 왔다.']}
 ];
+const FIGHTTALK={b:[['버키는 대답 대신 문단속을 한 번 더 확인했다. 아까도 확인했는데.','"……신경 쓰지 마라." 버키가 짧게 말했다.'],
+  ['"……할 말 있으면 클린트한테 직접 하라고 해." 버키가 시선을 피했다. 아무도 클린트 얘기는 안 했는데.','버키는 대답하지 않았다. 이미 깨끗한 칼날만 같은 방향으로 계속 닦았다.','버키가 현관 쪽을 봤다. 순찰을 한 번 더 나갈 핑계를 찾는 얼굴이었다.'],
+  ['"괜찮다." 버키가 말했다. 하나도 안 괜찮은 얼굴로. 소파 맞은편 빈자리를 한 번 봤다.','버키가 클린트의 머그컵에 커피를 따랐다가, 그대로 식탁에 두고 자리를 떴다. 화가 나도 그건 하는 사람이었다.','"……화난 거 아니다." 버키가 말했다. 무서웠던 거다. 그 말은 아직 못 했다.']],
+ bd:['버키가 럭키를 쓰다듬었다. 럭키가 클린트 쪽을 봤다. 버키는 그쪽을 보지 않았다.'],
+ c:[['"어, 아니야. 별일 아니야. 내일이면 괜찮을 거야." 클린트가 말했다. 반은 자기한테 하는 말이었다.','클린트가 괜히 리모컨을 만지작거렸다. 채널은 한 번도 바뀌지 않았다.'],
+  ['"버키? 아, 걔 지금 나랑 말 안 해. 괜찮아, 나 원래 미움받는 거 익숙해!" 클린트가 웃었다. 웃음이 금방 끝났다.','클린트가 농담을 하려다 입을 다물었다. 오늘은 그게 통하지 않는다는 걸 알았다.','클린트가 버키가 있는 쪽을 힐끔 봤다. 버키는 이쪽을 보지 않았다.'],
+  ['"내가 잘못했지 뭐." 클린트가 천장을 보며 말했다. "알아. 아는데… 어떻게 말해야 할지를 모르겠어."','클린트가 버키 베개를 끌어안고 소파에 누웠다. 침실 문은 닫혀 있었다.','"농담하면 더 화낼 거고, 진지하게 하면… 그건 좀 무섭고." 클린트가 중얼거렸다. 결국 둘 다 안 했다.']],
+ cd:['"럭키, 너는 내 편이지?" 럭키는 꼬리를 흔들고 버키 쪽으로 갔다. "……배신자."']};
+const BADTALK={b:[['버키가 고개를 들었다가, 대답 없이 다시 숙였다. 눈 밑이 어둡다.','버키의 손이 습관처럼 허리춤으로 갔다. 아무것도 없다는 걸 확인하고도, 한참 그 손을 거두지 못했다.'],
+  ['"……지금은 말하고 싶지 않다." 버키가 낮게 말했다. 화난 목소리가 아니었다. 지친 목소리였다.','버키는 대답하지 않았다. 창밖만 보고 있다. 그래도 클린트가 두고 간 커피는 손에 쥐고 있었다.','버키가 잠깐 이쪽을 봤다. 괜찮다고 말하려다 그만두는 얼굴이었다.'],
+  ['"……괜찮다." 괜찮지 않은 목소리였다. 그래도 거짓말은 아니었다. 오늘은 클린트가 있으니까.','버키는 대답 대신 클린트가 있는 쪽을 봤다. 오늘 버키가 숨 쉬는 방향이었다.','버키가 아주 작게 고개를 저었다. 오늘은 안 된다는 뜻이었다. 내일은 괜찮을 거라는 뜻이기도 했다.']],
+ bd:['버키는 대답 대신 발치의 럭키를 쓰다듬었다. 손이 아주 천천히 움직였다.'],
+ c:[['클린트는 아무 반응이 없었다. 들리지 않으니까. 한참 뒤에야 인기척을 느끼고 고개를 돌렸다. "……어? 미안, 오늘 하나도 안 들려."','"하하, 오늘 나한테 말 걸어 봤자 소용없어!" 클린트가 일부러 크게 웃었다. 너무 크게.'],
+  ['클린트가 입 모양을 읽으려고 눈을 가늘게 떴다. "……천천히 말해 줄래?" 평소보다 목소리가 조금 컸다.','클린트가 메모지를 내밀었다. "여기 써 줘." 그 밑에 작게 "미안"이라고 적혀 있었다.','클린트는 못 들은 척 웃었다. 사실은 정말 못 들었다. 그게 오늘 클린트를 가장 지치게 했다.'],
+  ['클린트가 손으로 대답했다. "오늘은 손으로 해 줘." 그리고 버키 쪽을 봤다. 버키는 이미 손을 움직이고 있었다.','클린트가 고개를 저었다. 들리지 않는다는 뜻이었다. 그래도 웃고 있었다. 오늘은 혼자가 아니니까.','"괜찮아, 괜찮아." 클린트가 세 번째로 말했다. 버키가 그 어깨를 짚자, 클린트는 네 번째를 말하지 않았다.']],
+ cd:['클린트는 아무것도 듣지 못했다. 대신 럭키가 클린트의 손을 코로 쿡 찔러 이쪽을 보게 했다. "……고마워, 럭키."']};
 const ABSTALK={b:[['버키가 고개를 들어 소파 쪽을 봤다. 비어 있다. 버키는 다시 하던 일로 돌아갔다.','버키는 대답 대신 현관 쪽을 한 번 봤다. 아직 아무도 오지 않았다.'],
   ['"……클린트? 불렀—" 버키가 말을 멈췄다. 소파가 텅 비어 있었다. 아직 돌아오지 않았다.','버키가 무심코 커피를 두 잔 내렸다가, 한 잔을 도로 부었다.','버키가 시계를 봤다. 그리고 아까 시계를 본 지 십 분도 안 됐다는 걸 알았다.'],
   ['"클린트, 너—" 버키가 돌아보다 멈칫했다. 텅 빈 소파. 버키는 잠깐 그대로 서 있다가, 시계를 봤다.','버키가 클린트의 후드티를 개다가, 한참 그걸 손에 들고 있었다.','"……늦네." 버키가 혼잣말을 했다. 아직 늦을 시간이 아니었다.']],
@@ -1138,7 +1159,7 @@ function runHour(hk){
    else if(!S.bad.ended&&DAY.includes(x.slot)&&Math.random()<.45){const a=B.mid(x);let k=Math.floor(Math.random()*a.length);if(k===S.lastBad)k=(k+1)%a.length;S.lastBad=k;ev={id:'bad_mid',t:'나쁜 날',ty:'돌봄'};lines=[a[k]]}}
   if(!ev&&!S.bigFight&&!S.bad&&x.st>=3&&['eve','dusk'].includes(x.slot)&&(S.lastBF==null||hk-S.lastBF>240)&&Math.random()<.03){S.bigFight={start:hk};S.lastBF=hk;ev={id:'bf_start',t:'세 번째',ty:'갈등'};lines=BF.start(x)}
   if(!ev&&S.bigFight){noPool=true;const d=hk-S.bigFight.start;
-   if(d>=44&&['dusk','eve','night'].includes(x.slot)){S.bigFight=null;S.pts+=6;ev={id:'bf_end',t:'농담 없이',ty:'대화'};lines=BF.end(x);unlock(x,{hb:'c_sorry'})}
+   if(d>=44&&['dusk','eve','night'].includes(x.slot)){S.bigFight=null;S.bfEnd=hk;S.pts+=6;ev={id:'bf_end',t:'농담 없이',ty:'대화'};lines=BF.end(x);unlock(x,{hb:'c_sorry'})}
    else if(d>=1&&x.slot!=='deep'&&Math.random()<.35){let k=Math.floor(Math.random()*BF.mid.length);if(k===S.lastBFm)k=(k+1)%BF.mid.length;S.lastBFm=k;ev={id:'bf_mid',t:'거리',ty:'갈등'};lines=[BF.mid[k]]}}
   if(!ev){const deaf=S.bad&&S.bad.w==='c'&&!S.bad.ended,quiet=x.slot==='night'||(x.slot==='deep'&&x.h<2)||S.cond.c.ear>=7||deaf;
    const nx=ASL.find(a=>!S.asl.l[a[0]]);
@@ -1374,7 +1395,10 @@ function doAct(id){
  if(id==='talkB'||id==='talkC'){const who=id==='talkB'?'b':'c',me=s[who];const g=st<2?0:st<4?1:2;
   if(me.loc==='out')resp(who==='b'?'버키는 은신처에 없다. 바깥 어딘가를 돌고 있다.':'클린트는 은신처에 없다.');
   else if(me.sleep)resp(who==='b'?'버키는 자고 있다. 아주 잠깐 미간이 찌푸려졌다가, 다시 풀린다.':'클린트는 자고 있다. 보청기를 뺀 채라 아무것도 듣지 못한다.');
-  else{let a=TALK[who][g];const ow=OTH[who];if(awayAt(ow,Date.now())){a=ABSTALK[who][g].slice();if(S.dog&&S.dog.named&&dogHome(Date.now()))a=a.concat(ABSTALK[who+'d'])}else {}if(S.dog&&S.dog.named&&dogHome(Date.now())&&!awayAt(ow,Date.now())&&Math.random()<.35)a=DOGTALK[who].concat(g>=2?DOGTALK[who+'2']:[]);let line=a[Math.floor(Math.random()*a.length)];if(g===0)line=line.replace('반즈',names().B);resp(line)}
+  else{let a=TALK[who][g];const ow=OTH[who];const badNow=S.bad&&S.bad.w===who&&!S.bad.ended&&nowHK()<S.bad.start+24;
+  const fightNow=S.bigFight?'big':(S.fight?'small':null);
+  if(fightNow&&!badNow){a=FIGHTTALK[who][fightNow==='big'?(g>=2?2:1):0].slice();if(S.dog&&S.dog.named&&dogHome(Date.now()))a=a.concat(FIGHTTALK[who+'d'])}
+  else if(badNow){a=BADTALK[who][g].slice();if(S.dog&&S.dog.named&&dogHome(Date.now()))a=a.concat(BADTALK[who+'d'])}else if(awayAt(ow,Date.now())){a=ABSTALK[who][g].slice();if(S.dog&&S.dog.named&&dogHome(Date.now()))a=a.concat(ABSTALK[who+'d'])}else {}if(!badNow&&!fightNow&&S.dog&&S.dog.named&&dogHome(Date.now())&&!awayAt(ow,Date.now())&&Math.random()<.35)a=DOGTALK[who].concat(g>=2?DOGTALK[who+'2']:[]);let line=a[Math.floor(Math.random()*a.length)];if(g===0)line=line.replace('반즈',names().B);resp(line)}
   return}
  if(id==='dogfood'){S.dog.food=Date.now()+12*H;addBonus();resp('럭키 밥그릇에 사료를 가득 채웠다. 럭키가 꼬리를 프로펠러처럼 돌렸다.')}
  if(wishActive()&&WISH[S.wish.id].act===id&&(id!=='radio'||p.radioCh))fulfillWish();
